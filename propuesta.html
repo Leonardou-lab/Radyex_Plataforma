@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADYEX — Mis órdenes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16243F;
+    --ink-soft:#2D4373;
+    --bg:#F4F7FA;
+    --surface:#FFFFFF;
+    --accent:#2C9C95;
+    --accent-soft:#E5F5F3;
+    --accent-dark:#1F756F;
+    --warn:#C2750C;
+    --warn-soft:#FBF0DF;
+    --success:#1F8A4C;
+    --success-soft:#E7F6ED;
+    --pending:#5B6B85;
+    --pending-soft:#EBEEF3;
+    --text:#1A2540;
+    --text-muted:#67738C;
+    --border:#E3E8EF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .font-display{font-family:'Lexend',sans-serif;}
+  ::selection{background:var(--accent-soft);}
+  a,button{cursor:pointer;}
+  button:focus-visible, input:focus-visible, .chip:focus-visible, .navitem:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  .layout{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{
+    width:248px;
+    background:var(--ink);
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    padding:28px 18px;
+    flex-shrink:0;
+  }
+  .brand{display:flex;align-items:center;justify-content:center;padding:0 8px 28px 8px;}
+  .brand-text{font-family:'Lexend',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.2px;line-height:1.15;text-align:center;}
+  .brand-text span{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:13px;color:#9FB0CC;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+  .nav-section-label{
+    font-size:11px;letter-spacing:1.2px;color:#7E8FB0;text-transform:uppercase;
+    padding:14px 12px 8px;font-weight:600;
+  }
+  .navitem{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:10px;
+    color:#C9D3E6;font-size:14.5px;font-weight:500;
+    text-decoration:none;border:none;background:none;width:100%;text-align:left;
+    transition:background .15s ease, color .15s ease;
+  }
+  .navitem svg{flex-shrink:0;opacity:.85;}
+  .navitem:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .navitem.active{background:var(--accent);color:#0C2A28;font-weight:600;}
+  .navitem.active svg{opacity:1;}
+  .navitem .badge{
+    margin-left:auto;background:rgba(255,255,255,.12);
+    font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;color:#fff;
+  }
+  .navitem.active .badge{background:rgba(12,42,40,.18);color:#0C2A28;}
+  .sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding-top:14px;}
+
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{
+    background:var(--surface);border-bottom:1px solid var(--border);
+    padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+    flex-wrap:wrap;
+  }
+  .page-title{font-family:'Lexend',sans-serif;font-weight:700;font-size:22px;color:var(--ink);}
+  .page-sub{font-size:13.5px;color:var(--text-muted);margin-top:2px;}
+  .topbar-actions{display:flex;align-items:center;gap:12px;}
+  .btn-primary{
+    background:var(--ink);color:#fff;border:none;border-radius:10px;
+    padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn-primary:hover{background:var(--ink-soft);}
+  .avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--accent-soft);color:var(--accent-dark);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;
+    font-family:'Lexend',sans-serif;
+  }
+
+  .content{padding:28px 32px 48px;}
+
+  /* Stat cards */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:18px 20px;display:flex;align-items:center;gap:14px;
+  }
+  .stat-icon{
+    width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .stat-num{font-family:'Lexend',sans-serif;font-weight:700;font-size:21px;color:var(--ink);line-height:1.1;}
+  .stat-label{font-size:12.5px;color:var(--text-muted);margin-top:1px;}
+
+  /* Toolbar: search + filters */
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+  .search-box{
+    position:relative;flex:1;min-width:240px;max-width:380px;
+  }
+  .search-box input{
+    width:100%;padding:11px 14px 11px 40px;border-radius:10px;border:1px solid var(--border);
+    font-size:14px;font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);
+  }
+  .search-box input::placeholder{color:#9AA6BD;}
+  .search-box svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9AA6BD;}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--border);background:var(--surface);color:var(--text-muted);
+    padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:600;
+    display:flex;align-items:center;gap:7px;transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--ink);}
+  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .chip .dot{width:7px;height:7px;border-radius:50%;}
+
+  /* Order cards */
+  .order-list{display:flex;flex-direction:column;gap:10px;}
+  .order-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:16px 20px;display:flex;align-items:center;gap:16px;
+    border-left:4px solid var(--pending);
+    transition:box-shadow .15s ease, transform .1s ease;
+    cursor:pointer;
+  }
+  .order-card:hover{box-shadow:0 4px 16px rgba(22,36,63,.07);transform:translateY(-1px);}
+  .order-card.status-success{border-left-color:var(--success);}
+  .order-card.status-warn{border-left-color:var(--warn);}
+  .order-card.status-pending{border-left-color:var(--pending);}
+
+  .order-avatar{
+    width:44px;height:44px;border-radius:11px;background:var(--pending-soft);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;font-family:'Lexend',sans-serif;
+    font-weight:700;font-size:14px;flex-shrink:0;
+  }
+  .order-main{flex:1;min-width:0;}
+  .order-name{font-family:'Lexend',sans-serif;font-weight:600;font-size:15.5px;color:var(--ink);}
+  .order-meta{display:flex;align-items:center;gap:16px;margin-top:5px;flex-wrap:wrap;}
+  .order-meta-item{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text-muted);}
+  .order-meta-item svg{flex-shrink:0;opacity:.8;}
+
+  .status-pill{
+    padding:6px 13px;border-radius:999px;font-size:12.5px;font-weight:700;
+    display:flex;align-items:center;gap:6px;flex-shrink:0;white-space:nowrap;
+  }
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;}
+  .status-pill.success{background:var(--success-soft);color:var(--success);}
+  .status-pill.success .dot{background:var(--success);}
+  .status-pill.warn{background:var(--warn-soft);color:var(--warn);}
+  .status-pill.warn .dot{background:var(--warn);}
+  .status-pill.pending{background:var(--pending-soft);color:var(--pending);}
+  .status-pill.pending .dot{background:var(--pending);}
+
+  .chevron{color:#B5BECF;flex-shrink:0;}
+
+  /* ====== Modal: detalle de paciente ====== */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(16,24,42,.55);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;z-index:50;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    background:var(--surface);border-radius:18px;max-width:620px;width:100%;
+    max-height:88vh;overflow-y:auto;padding:28px 28px 26px;position:relative;
+    box-shadow:0 24px 60px rgba(16,24,42,.28);
+    animation:modalIn .18s ease;
+  }
+  @keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  .modal-close{
+    position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:9px;
+    border:1px solid var(--border);background:var(--surface);color:var(--text-muted);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .modal-close:hover{background:var(--bg);color:var(--ink);}
+
+  .modal-header{display:flex;align-items:center;gap:14px;padding-right:36px;margin-bottom:22px;flex-wrap:wrap;}
+  .modal-avatar{
+    width:52px;height:52px;border-radius:13px;background:var(--pending-soft);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;font-family:'Lexend',sans-serif;
+    font-weight:700;font-size:16px;flex-shrink:0;
+  }
+  .modal-name{font-family:'Lexend',sans-serif;font-weight:700;font-size:17.5px;color:var(--ink);}
+  .modal-folio{font-size:12.5px;color:var(--text-muted);margin-top:2px;}
+
+  .modal-info-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+    background:var(--bg);border:1px solid var(--border);border-radius:14px;
+    padding:18px 20px;margin-bottom:26px;
+  }
+  .info-item{display:flex;gap:10px;align-items:flex-start;}
+  .info-icon{
+    width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent-dark);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  }
+  .info-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+  .info-value{font-size:14px;color:var(--ink);font-weight:600;margin-top:1px;line-height:1.3;}
+
+  .modal-section-title{
+    font-family:'Lexend',sans-serif;font-weight:600;font-size:14.5px;color:var(--ink);
+    margin-bottom:12px;display:flex;align-items:center;gap:8px;
+  }
+
+  .year-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .year-tab{
+    border:1px solid var(--border);background:var(--surface);color:var(--text-muted);
+    padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;
+  }
+  .year-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .file-list{display:flex;flex-direction:column;gap:8px;}
+  .file-row{
+    display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:12px;
+    padding:11px 14px;background:var(--surface);
+  }
+  .file-icon{
+    width:34px;height:34px;border-radius:9px;background:var(--pending-soft);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .file-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .file-date{font-size:12px;color:var(--text-muted);margin-top:1px;}
+  .file-action{
+    margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:all .15s ease;
+  }
+  .file-action:hover{background:var(--accent-soft);color:var(--accent-dark);border-color:var(--accent);}
+  .file-empty{text-align:center;padding:22px 0;color:var(--text-muted);font-size:13.5px;background:var(--bg);border-radius:12px;border:1px dashed var(--border);}
+
+  @media (max-width:880px){
+    .sidebar{width:78px;padding:24px 12px;}
+    .brand-text, .nav-section-label, .navitem span, .navitem .badge, .sidebar-bottom span{display:none;}
+    .navitem{justify-content:center;}
+    .brand{justify-content:center;padding-bottom:24px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .topbar, .content{padding-left:18px;padding-right:18px;}
+    .order-meta{gap:10px;}
+    .modal-info-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-text">RADYEX<span>Radiología dental</span></div>
+    </div>
+
+    <div class="nav-section-label">Menú</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;">
+      <button class="navitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Inicio</span>
+      </button>
+      <button class="navitem active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        <span>Mis órdenes</span>
+        <span class="badge">44</span>
+      </button>
+      <button class="navitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+        <span>Pacientes</span>
+      </button>
+      <button class="navitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span>Agenda</span>
+      </button>
+      <button class="navitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2.5 20c0-3 2.5-5 5.5-5s5.5 2 5.5 5M14.5 14.5c2.8.3 4.5 2 4.5 4.7"/></svg>
+        <span>Contactos</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="navitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Salir</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Mis órdenes</div>
+        <div class="page-sub">Consulta y da seguimiento a los estudios de tus pacientes</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nueva orden
+        </button>
+        <div class="avatar">LM</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stat overview -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--pending-soft);color:var(--pending);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+          </div>
+          <div><div class="stat-num">44</div><div class="stat-label">Órdenes totales</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--warn-soft);color:var(--warn);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <div><div class="stat-num">5</div><div class="stat-label">En proceso</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--success-soft);color:var(--success);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m4 12 5 5 11-11"/></svg>
+          </div>
+          <div><div class="stat-num">37</div><div class="stat-label">Finalizadas</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--pending-soft);color:var(--ink-soft);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div><div class="stat-num">2</div><div class="stat-label">Pendientes</div></div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="text" placeholder="Buscar paciente o folio...">
+        </div>
+        <div class="filters" id="filterChips">
+          <button class="chip active" data-filter="todos">Todos <span style="opacity:.7">44</span></button>
+          <button class="chip" data-filter="pending"><span class="dot" style="background:var(--pending)"></span>Pendiente</button>
+          <button class="chip" data-filter="warn"><span class="dot" style="background:var(--warn)"></span>En proceso</button>
+          <button class="chip" data-filter="success"><span class="dot" style="background:var(--success)"></span>Finalizado</button>
+        </div>
+      </div>
+
+      <!-- Order list -->
+      <div class="order-list" id="orderList">
+        <!-- cards injected by JS -->
+      </div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin-top:14px;">Toca cualquier paciente para ver su información completa y sus archivos.</p>
+
+    </div>
+  </main>
+</div>
+
+<!-- ====== MODAL: detalle de paciente ====== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div class="modal-header">
+      <div class="modal-avatar" id="modalAvatar"></div>
+      <div>
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-folio" id="modalFolio"></div>
+      </div>
+      <div class="status-pill" id="modalStatus" style="margin-left:auto;">
+        <span class="dot"></span><span id="modalStatusLabel"></span>
+      </div>
+    </div>
+
+    <div class="modal-info-grid" id="modalInfoGrid"></div>
+
+    <div class="modal-section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      Archivos del paciente
+    </div>
+    <div class="year-tabs" id="yearTabs"></div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+</div>
+
+<script>
+  const ICONS = {
+    doctor: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5 1.5 1.5 4-1 5.5-2 1-5 1-5-1.5v-3"/><path d="M9 3v5a3 3 0 0 0 6 0V3"/><path d="M6 8v3a6 6 0 0 0 6 6"/><circle cx="19" cy="19" r="0"/></svg>',
+    phone: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.4 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2.1Z"/></svg>',
+    mail: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>',
+    age: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>',
+    since: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+    study: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    file: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+    eye: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  };
+
+  const orders = [
+    {name:"Omar Mateo Rosas Lara", init:"OR", loc:"Puebla", code:"LN251220015", date:"20 dic 2025", status:"success", studies:2,
+     phone:"222 145 7732", email:"omar.rosas@gmail.com", age:34, since:"2023 · 3 años", doctor:"Dra. Patricia Núñez", studyType:"Tomografía CBCT",
+     files:{2025:[{name:"Tomografía CBCT.pdf", date:"20 dic 2025"}], 2024:[{name:"Radiografía panorámica.pdf", date:"14 mar 2024"}], 2023:[{name:"Serie periapical.pdf", date:"02 feb 2023"}]}},
+
+    {name:"Marilú Méndez Martínez", init:"MM", loc:"Puebla", code:"LN251017016", date:"17 oct 2025", status:"success", studies:1,
+     phone:"222 308 9912", email:"marilu.mendez@hotmail.com", age:51, since:"2022 · 4 años", doctor:"Dr. Iván Cordero", studyType:"Radiografía panorámica",
+     files:{2025:[{name:"Radiografía panorámica.pdf", date:"17 oct 2025"}], 2023:[{name:"Cefalométrica lateral.pdf", date:"11 may 2023"}], 2022:[{name:"Serie periapical.pdf", date:"30 ago 2022"}]}},
+
+    {name:"Luis Ángel Castillo Medellín", init:"LC", loc:"Puebla", code:"LN250805010", date:"05 ago 2025", status:"warn", studies:2,
+     phone:"222 477 0156", email:"luis.castillo@outlook.com", age:27, since:"2025 · 1 año", doctor:"Dra. Renata Solís", studyType:"Tomografía CBCT",
+     files:{2025:[{name:"Tomografía CBCT (en proceso).pdf", date:"05 ago 2025"}]}},
+
+    {name:"Aline Daniela Vargas Sánchez", init:"AV", loc:"Puebla", code:"LN250802018", date:"02 ago 2025", status:"success", studies:1,
+     phone:"222 590 4423", email:"aline.vargas@gmail.com", age:19, since:"2024 · 2 años", doctor:"Dr. Iván Cordero", studyType:"Serie periapical",
+     files:{2025:[{name:"Serie periapical.pdf", date:"02 ago 2025"}], 2024:[{name:"Radiografía panorámica.pdf", date:"19 nov 2024"}]}},
+
+    {name:"María Guadalupe Zarco Herrera", init:"MZ", loc:"Puebla", code:"TM250709012", date:"09 jul 2025", status:"pending", studies:1,
+     phone:"222 612 8870", email:"maria.zarco@gmail.com", age:62, since:"2025 · nuevo", doctor:"Dra. Patricia Núñez", studyType:"Cefalométrica lateral",
+     files:{2025:[]}},
+
+    {name:"Giovanna Fernanda Flores Gómez", init:"GF", loc:"Puebla", code:"LN250708008", date:"08 jul 2025", status:"success", studies:2,
+     phone:"222 734 2298", email:"giovanna.flores@gmail.com", age:29, since:"2023 · 3 años", doctor:"Dra. Renata Solís", studyType:"Tomografía CBCT",
+     files:{2025:[{name:"Tomografía CBCT.pdf", date:"08 jul 2025"}], 2024:[{name:"Radiografía panorámica.pdf", date:"22 ene 2024"}], 2023:[{name:"Serie periapical.pdf", date:"15 jun 2023"}]}},
+
+    {name:"María Guillermina Alarcón de Martino", init:"MA", loc:"Puebla", code:"LN250616002", date:"16 jun 2025", status:"warn", studies:2,
+     phone:"222 866 5541", email:"guille.alarcon@hotmail.com", age:58, since:"2021 · 5 años", doctor:"Dr. Iván Cordero", studyType:"Radiografía panorámica",
+     files:{2025:[{name:"Radiografía panorámica (en proceso).pdf", date:"16 jun 2025"}], 2022:[{name:"Tomografía CBCT.pdf", date:"03 sep 2022"}], 2021:[{name:"Serie periapical.pdf", date:"10 abr 2021"}]}},
+
+    {name:"Damiana Uscanga Guadarrama", init:"DU", loc:"Puebla", code:"TM250602018", date:"02 jun 2025", status:"pending", studies:1,
+     phone:"222 901 3387", email:"damiana.uscanga@gmail.com", age:41, since:"2025 · nuevo", doctor:"Dra. Renata Solís", studyType:"Serie periapical",
+     files:{2025:[]}},
+  ];
+
+  const statusMap = {
+    success: {label:"Finalizado", cls:"success"},
+    warn: {label:"En proceso", cls:"warn"},
+    pending: {label:"Pendiente", cls:"pending"},
+  };
+
+  const list = document.getElementById('orderList');
+  const search = document.getElementById('searchInput');
+  let activeFilter = 'todos';
+
+  function render(){
+    const q = search.value.trim().toLowerCase();
+    list.innerHTML = '';
+    orders
+      .filter(o => activeFilter === 'todos' || o.status === activeFilter)
+      .filter(o => o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q))
+      .forEach(o => {
+        const s = statusMap[o.status];
+        const card = document.createElement('div');
+        card.className = `order-card status-${o.status}`;
+        card.innerHTML = `
+          <div class="order-avatar">${o.init}</div>
+          <div class="order-main">
+            <div class="order-name">${o.name}</div>
+            <div class="order-meta">
+              <div class="order-meta-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                ${o.loc}
+              </div>
+              <div class="order-meta-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16"/></svg>
+                ${o.code}
+              </div>
+              <div class="order-meta-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                ${o.date}
+              </div>
+              <div class="order-meta-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                ${o.studies} estudio${o.studies>1?'s':''}
+              </div>
+            </div>
+          </div>
+          <div class="status-pill ${s.cls}"><span class="dot"></span>${s.label}</div>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+        `;
+        card.addEventListener('click', () => openModal(o));
+        list.appendChild(card);
+      });
+
+    if(list.children.length === 0){
+      list.innerHTML = `<div style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:14px;">No encontramos órdenes con esos criterios.</div>`;
+    }
+  }
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      render();
+    });
+  });
+  search.addEventListener('input', render);
+
+  /* ====== Modal logic ====== */
+  const overlay = document.getElementById('modalOverlay');
+
+  function infoItem(iconKey, label, value){
+    return `
+      <div class="info-item">
+        <div class="info-icon">${ICONS[iconKey]}</div>
+        <div>
+          <div class="info-label">${label}</div>
+          <div class="info-value">${value}</div>
+        </div>
+      </div>`;
+  }
+
+  function openModal(o){
+    document.getElementById('modalAvatar').textContent = o.init;
+    document.getElementById('modalName').textContent = o.name;
+    document.getElementById('modalFolio').textContent = `${o.code} · ${o.loc}`;
+
+    const s = statusMap[o.status];
+    document.getElementById('modalStatusLabel').textContent = s.label;
+    document.getElementById('modalStatus').className = `status-pill ${s.cls}`;
+
+    document.getElementById('modalInfoGrid').innerHTML =
+      infoItem('doctor', 'Doctor referente', o.doctor) +
+      infoItem('phone', 'Teléfono', o.phone) +
+      infoItem('mail', 'Correo', o.email) +
+      infoItem('age', 'Edad', o.age + ' años') +
+      infoItem('since', 'Paciente desde', o.since) +
+      infoItem('study', 'Tipo de estudio', o.studyType);
+
+    renderYearTabs(o);
+    overlay.classList.add('open');
+  }
+
+  function renderYearTabs(o){
+    const years = Object.keys(o.files).sort((a,b)=>b-a);
+    const tabsEl = document.getElementById('yearTabs');
+    tabsEl.innerHTML = years.map((y,i)=>`<button class="year-tab ${i===0?'active':''}" data-year="${y}">${y}</button>`).join('');
+    renderFiles(o, years[0]);
+    tabsEl.querySelectorAll('.year-tab').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        tabsEl.querySelectorAll('.year-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        renderFiles(o, tab.dataset.year);
+      });
+    });
+  }
+
+  function renderFiles(o, year){
+    const filesEl = document.getElementById('fileList');
+    const files = o.files[year] || [];
+    if(files.length === 0){
+      filesEl.innerHTML = `<div class="file-empty">Aún no hay archivos cargados para ${year}.</div>`;
+      return;
+    }
+    filesEl.innerHTML = files.map(f => `
+      <div class="file-row">
+        <div class="file-icon">${ICONS.file}</div>
+        <div>
+          <div class="file-name">${f.name}</div>
+          <div class="file-date">${f.date}</div>
+        </div>
+        <button class="file-action" title="Ver archivo">${ICONS.eye}</button>
+      </div>
+    `).join('');
+  }
+
+  function closeModal(){ overlay.classList.remove('open'); }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+  render();
+</script>
+
+</body>
+</html>
