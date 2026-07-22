@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADYEX — Subir archivos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  #uploadGrid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:1080px){#uploadGrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-text">RADYEX<span>Radiología dental</span></div>
+    </div>
+    <div class="role-tag">Panel interno</div>
+
+    <div class="nav-section-label">Menú</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;">
+      <a class="navitem" href="radyex-inicio.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a class="navitem" href="radyex-ordenes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        <span>Órdenes</span>
+      </a>
+      <a class="navitem" href="radyex-doctores.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg>
+        <span>Doctores</span>
+      </a>
+      <a class="navitem active" href="radyex-subir.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+        <span>Subir archivos</span>
+      </a>
+      <a class="navitem" href="radyex-pacientes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+        <span>Pacientes</span>
+      </a>
+      <a class="navitem" href="radyex-bitacora.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        <span>Bitácora</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">RX</div>
+        <div>
+          <div class="sidebar-user-name">Equipo Radyex</div>
+          <div class="sidebar-user-role">Personal interno</div>
+        </div>
+      </div>
+      <a class="navitem" href="index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Salir</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Subir archivos</div>
+        <div class="page-sub">Sube el estudio a la carpeta del doctor y del paciente</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="avatar">RX</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="uploadGrid">
+
+        <div class="panel">
+          <div class="steps">
+            <div class="step active" id="stepTag1"><div class="step-num">1</div>Doctor</div>
+            <div class="step-sep"></div>
+            <div class="step" id="stepTag2"><div class="step-num">2</div>Paciente</div>
+            <div class="step-sep"></div>
+            <div class="step" id="stepTag3"><div class="step-num">3</div>Estudio</div>
+            <div class="step-sep"></div>
+            <div class="step" id="stepTag4"><div class="step-num">4</div>Archivo</div>
+          </div>
+
+          <form id="uploadForm" novalidate>
+
+            <!-- Paso 1: doctor -->
+            <div class="field">
+              <label class="field-label" for="docSearch">1. Selecciona el doctor</label>
+              <div class="combobox">
+                <div class="input-with-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" id="docSearch" placeholder="Buscar doctor por nombre o consultorio..." autocomplete="off">
+                </div>
+                <div class="search-results" id="docResults"></div>
+              </div>
+              <div id="docSelectedWrap"></div>
+            </div>
+
+            <!-- Paso 2: paciente -->
+            <div class="field">
+              <label class="field-label" for="patSearch">2. Selecciona el paciente</label>
+              <div class="combobox">
+                <div class="input-with-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" id="patSearch" placeholder="Primero selecciona un doctor" autocomplete="off" disabled>
+                </div>
+                <div class="search-results" id="patResults"></div>
+              </div>
+              <div id="patSelectedWrap"></div>
+            </div>
+
+            <!-- Paso 3: tipo de estudio + fecha -->
+            <div class="field-row">
+              <div class="field" id="f-studyType">
+                <label class="field-label" for="studyType">3. Tipo de estudio</label>
+                <select id="studyType">
+                  <option value="">Selecciona un tipo</option>
+                </select>
+              </div>
+              <div class="field" id="f-studyDate">
+                <label class="field-label" for="studyDate">Fecha del estudio</label>
+                <input type="date" id="studyDate">
+              </div>
+            </div>
+
+            <!-- Paso 4: dropzone -->
+            <div class="field">
+              <label class="field-label">4. Archivo del estudio</label>
+              <div class="dropzone" id="dropzone">
+                <div class="dropzone-icon" id="dropzoneIcon"></div>
+                <div class="dropzone-title">Arrastra y suelta el PDF o imagen aquí</div>
+                <div class="dropzone-sub">o <button type="button" class="dropzone-browse" id="browseBtn">selecciona un archivo</button> de tu equipo — PDF, JPG o PNG</div>
+                <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png">
+              </div>
+              <div id="filePreviewWrap"></div>
+            </div>
+
+            <div class="panel" style="background:var(--accent-soft);border-color:var(--accent);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;margin-bottom:20px;">
+              <div style="color:var(--accent-dark);flex-shrink:0;margin-top:1px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg></div>
+              <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;">Al subir el archivo, el doctor será notificado y podrá consultarlo de inmediato en "Mis órdenes".</div>
+            </div>
+
+            <button type="submit" class="btn-accent btn-block" id="submitBtn" disabled>Subir a la carpeta del doctor</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+            Carpeta destino
+          </div>
+          <div class="panel-sub" id="destBreadcrumb">Selecciona doctor y paciente para ver dónde aterriza el archivo.</div>
+          <div id="destFiles"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="common.js"></script>
+<script>
+  document.getElementById('dropzoneIcon').innerHTML = RADYEX.ICONS.upload;
+
+  RADYEX.STUDY_TYPES.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    document.getElementById('studyType').appendChild(opt);
+  });
+  document.getElementById('studyDate').valueAsDate = new Date();
+
+  let selectedDoctor = null;
+  let selectedOrder = null;
+  let selectedFile = null;
+
+  /* ---------- Paso 1: doctor ---------- */
+  const docSearch = document.getElementById('docSearch');
+  const docResults = document.getElementById('docResults');
+
+  function renderDocResults(){
+    const q = docSearch.value.trim().toLowerCase();
+    const doctors = RADYEX.getDoctors().filter(d => d.status === 'active');
+    const matches = doctors.filter(d => d.name.toLowerCase().includes(q) || d.clinic.toLowerCase().includes(q));
+    docResults.innerHTML = matches.map(d => `
+      <button type="button" class="search-result-item" data-id="${d.id}">
+        <div class="mini-avatar">${RADYEX.initials(d.name)}</div>
+        <div><div>${d.name}</div><div class="sr-sub">${d.specialty} · ${d.clinic}</div></div>
+      </button>
+    `).join('') || `<div style="padding:14px;font-size:13px;color:var(--text-muted);">Sin resultados.</div>`;
+    docResults.classList.add('open');
+  }
+  docSearch.addEventListener('focus', renderDocResults);
+  docSearch.addEventListener('input', renderDocResults);
+  docResults.addEventListener('click', e => {
+    const btn = e.target.closest('.search-result-item');
+    if (!btn) return;
+    selectDoctor(RADYEX.getDoctorById(btn.dataset.id));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#docSearch') && !e.target.closest('#docResults')) docResults.classList.remove('open');
+    if (!e.target.closest('#patSearch') && !e.target.closest('#patResults')) patResults.classList.remove('open');
+  });
+
+  function selectDoctor(doctor){
+    selectedDoctor = doctor;
+    selectedOrder = null;
+    docSearch.value = '';
+    docResults.classList.remove('open');
+    docSearch.closest('.field').querySelector('.input-with-icon').style.display = 'none';
+    document.getElementById('docSelectedWrap').innerHTML = `
+      <div class="selected-chip">
+        <div class="mini-avatar">${RADYEX.initials(doctor.name)}</div>
+        ${doctor.name} · ${doctor.clinic}
+        <button type="button" id="clearDoctor" aria-label="Quitar doctor"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>`;
+    document.getElementById('clearDoctor').addEventListener('click', () => {
+      selectedDoctor = null; selectedOrder = null;
+      docSearch.closest('.field').querySelector('.input-with-icon').style.display = '';
+      document.getElementById('docSelectedWrap').innerHTML = '';
+      clearPatient();
+      patSearch.disabled = true;
+      patSearch.placeholder = 'Primero selecciona un doctor';
+      updateDestPanel();
+      updateSubmitState();
+    });
+    stepDone(1); stepActive(2);
+    patSearch.disabled = false;
+    patSearch.placeholder = 'Buscar paciente de este doctor...';
+    updateDestPanel();
+    updateSubmitState();
+  }
+
+  /* ---------- Paso 2: paciente ---------- */
+  const patSearch = document.getElementById('patSearch');
+  const patResults = document.getElementById('patResults');
+
+  function renderPatResults(){
+    if (!selectedDoctor) return;
+    const q = patSearch.value.trim().toLowerCase();
+    const orders = RADYEX.getOrdersByDoctor(selectedDoctor.id).filter(o => o.name.toLowerCase().includes(q));
+    patResults.innerHTML = orders.map(o => {
+      const s = RADYEX.STATUS_MAP[o.status];
+      return `
+      <button type="button" class="search-result-item" data-code="${o.code}">
+        <div class="mini-avatar">${o.init}</div>
+        <div style="flex:1;"><div>${o.name}</div><div class="sr-sub">${o.code}</div></div>
+        <span class="status-pill ${s.cls}" style="padding:3px 9px;font-size:11px;"><span class="dot"></span>${s.label}</span>
+      </button>`;
+    }).join('') || `<div style="padding:14px;font-size:13px;color:var(--text-muted);">Este doctor no tiene pacientes registrados aún.</div>`;
+    patResults.classList.add('open');
+  }
+  patSearch.addEventListener('focus', renderPatResults);
+  patSearch.addEventListener('input', renderPatResults);
+  patResults.addEventListener('click', e => {
+    const btn = e.target.closest('.search-result-item');
+    if (!btn) return;
+    selectPatient(RADYEX.getOrderByCode(btn.dataset.code));
+  });
+
+  function selectPatient(order){
+    selectedOrder = order;
+    patResults.classList.remove('open');
+    patSearch.closest('.field').querySelector('.input-with-icon').style.display = 'none';
+    const s = RADYEX.STATUS_MAP[order.status];
+    document.getElementById('patSelectedWrap').innerHTML = `
+      <div class="selected-chip">
+        <div class="mini-avatar">${order.init}</div>
+        ${order.name} · ${order.code}
+        <span class="status-pill ${s.cls}" style="padding:3px 9px;font-size:11px;"><span class="dot"></span>${s.label}</span>
+        <button type="button" id="clearPatient" aria-label="Quitar paciente"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>`;
+    document.getElementById('clearPatient').addEventListener('click', () => { clearPatient(); updateSubmitState(); });
+    document.getElementById('studyType').value = order.studyType;
+    stepDone(2); stepActive(3);
+    updateDestPanel();
+    updateSubmitState();
+  }
+
+  function clearPatient(){
+    selectedOrder = null;
+    patSearch.value = '';
+    if (patSearch.closest('.field')) patSearch.closest('.field').querySelector('.input-with-icon').style.display = '';
+    document.getElementById('patSelectedWrap').innerHTML = '';
+    updateDestPanel();
+  }
+
+  /* ---------- Paso 3: pasos visuales ---------- */
+  function stepActive(n){ document.getElementById('stepTag'+n).classList.add('active'); }
+  function stepDone(n){ document.getElementById('stepTag'+n).classList.add('done'); document.getElementById('stepTag'+n).classList.remove('active'); }
+
+  /* ---------- Paso 4: dropzone ---------- */
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  document.getElementById('browseBtn').addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('click', (e) => { if (e.target.id !== 'browseBtn') fileInput.click(); });
+  ['dragenter','dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+  function formatSize(bytes){
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+
+  function handleFile(file){
+    selectedFile = file;
+    const ext = file.name.split('.').pop().toUpperCase();
+    document.getElementById('filePreviewWrap').innerHTML = `
+      <div class="file-preview">
+        <div class="file-icon">${RADYEX.ICONS.file}</div>
+        <div>
+          <div class="file-name">${file.name}</div>
+          <div class="file-date">${ext} · ${formatSize(file.size)}</div>
+        </div>
+        <button type="button" class="file-preview-remove" id="removeFile" aria-label="Quitar archivo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>`;
+    document.getElementById('removeFile').addEventListener('click', () => {
+      selectedFile = null;
+      fileInput.value = '';
+      document.getElementById('filePreviewWrap').innerHTML = '';
+      updateSubmitState();
+    });
+    stepDone(3); stepActive(4);
+    updateSubmitState();
+  }
+
+  /* ---------- Panel de carpeta destino ---------- */
+  function updateDestPanel(){
+    const breadcrumb = document.getElementById('destBreadcrumb');
+    const destFiles = document.getElementById('destFiles');
+    if (!selectedDoctor){
+      breadcrumb.textContent = 'Selecciona doctor y paciente para ver dónde aterriza el archivo.';
+      destFiles.innerHTML = '';
+      return;
+    }
+    if (!selectedOrder){
+      breadcrumb.innerHTML = `📁 Doctores / <strong>${selectedDoctor.name}</strong> — selecciona un paciente`;
+      destFiles.innerHTML = '';
+      return;
+    }
+    breadcrumb.innerHTML = `📁 Doctores / <strong>${selectedDoctor.name}</strong> / <strong>${selectedOrder.name}</strong>`;
+    const years = Object.keys(selectedOrder.files).sort((a,b)=>b-a);
+    let rows = [];
+    years.forEach(y => selectedOrder.files[y].forEach(f => rows.push(f)));
+    if (rows.length === 0){
+      destFiles.innerHTML = `<div class="file-empty">Esta carpeta aún no tiene archivos.</div>`;
+    } else {
+      destFiles.innerHTML = `<div class="file-list">` + rows.map(f => `
+        <div class="file-row">
+          <div class="file-icon">${RADYEX.ICONS.file}</div>
+          <div><div class="file-name">${f.name}</div><div class="file-date">${f.date}</div></div>
+          <div class="file-row-actions">
+            <button class="file-action" title="Ver archivo" aria-label="Ver archivo" data-name="${f.name}" data-date="${f.date}" data-src="${f.src}">${RADYEX.ICONS.eye}</button>
+          </div>
+        </div>`).join('') + `</div>`;
+    }
+  }
+
+  document.getElementById('destFiles').addEventListener('click', e => {
+    const btn = e.target.closest('.file-action');
+    if (!btn) return;
+    RADYEX.openFileViewer({ name: btn.dataset.name, date: btn.dataset.date, src: btn.dataset.src });
+  });
+
+  /* ---------- Envío ---------- */
+  function updateSubmitState(){
+    document.getElementById('submitBtn').disabled = !(selectedDoctor && selectedOrder && selectedFile);
+  }
+
+  document.getElementById('uploadForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!selectedDoctor || !selectedOrder || !selectedFile) return;
+
+    const studyType = document.getElementById('studyType').value || selectedOrder.studyType;
+    const studyDate = document.getElementById('studyDate').value;
+    const dateLabel = studyDate ? RADYEX.formatDateEs(new Date(studyDate + 'T12:00:00')) : RADYEX.formatDateEs();
+
+    RADYEX.addFileToOrder(selectedOrder.code, { name: selectedFile.name, date: dateLabel }, 'success');
+
+    showToast(RADYEX.ICONS.check, 'Archivo subido', `${selectedFile.name} se guardó en la carpeta de ${selectedOrder.name}. La orden ${selectedOrder.code} ahora está Finalizada y el doctor será notificado.`);
+
+    const finishedDoctor = selectedDoctor;
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('filePreviewWrap').innerHTML = '';
+    clearPatient();
+    updateDestPanelForClosed(finishedDoctor);
+    updateSubmitState();
+    document.getElementById('stepTag1').className = 'step done';
+    document.getElementById('stepTag2').className = 'step active';
+    document.getElementById('stepTag3').className = 'step';
+    document.getElementById('stepTag4').className = 'step';
+  });
+
+  function updateDestPanelForClosed(doctor){
+    selectedDoctor = doctor;
+    updateDestPanel();
+  }
+
+  function showToast(icon, title, msg){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `<div class="toast-icon">${icon}</div><div><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>`;
+    wrap.appendChild(el);
+    setTimeout(() => el.remove(), 6000);
+  }
+
+  /* ---------- Preselección por parámetro ?paciente=CODE ---------- */
+  const params = new URLSearchParams(window.location.search);
+  const preCode = params.get('paciente');
+  if (preCode){
+    const order = RADYEX.getOrderByCode(preCode);
+    if (order){
+      selectDoctor(RADYEX.getDoctorById(order.doctorId));
+      selectPatient(order);
+    }
+  }
+</script>
+
+</body>
+</html>

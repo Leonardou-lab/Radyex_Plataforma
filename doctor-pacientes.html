@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADYEX — Mis pacientes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>#patTableBody tr[data-code]{cursor:pointer;}</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-text">RADYEX<span>Radiología dental</span></div>
+    </div>
+    <div class="role-tag">Doctor referente</div>
+
+    <div class="nav-section-label">Menú</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;">
+      <a class="navitem" href="doctor-inicio.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a class="navitem" href="doctor-ordenes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        <span>Mis órdenes</span>
+      </a>
+      <a class="navitem active" href="doctor-pacientes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+        <span>Pacientes</span>
+        <span class="badge" id="patBadge"></span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">PN</div>
+        <div>
+          <div class="sidebar-user-name">Dra. Patricia Núñez</div>
+          <div class="sidebar-user-role">Doctora referente</div>
+        </div>
+      </div>
+      <a class="navitem" href="index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Salir</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Mis pacientes</div>
+        <div class="page-sub">Consulta y descarga los archivos de tus propios pacientes</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="avatar">PN</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="panel" style="background:var(--accent-soft);border-color:var(--accent);padding:14px 18px;display:flex;gap:10px;align-items:center;margin-bottom:20px;">
+        <div style="color:var(--accent-dark);flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg></div>
+        <div style="font-size:12.5px;color:var(--ink-soft);">Esta lista solo muestra a los pacientes que tú has referido. Ningún otro doctor puede ver tu información ni la de tus pacientes.</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="text" placeholder="Buscar paciente o folio...">
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Contacto</th>
+              <th>Folio actual</th>
+              <th>Estatus</th>
+              <th>Archivos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="patTableBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ====== MODAL: expediente del paciente ====== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div class="modal-header">
+      <div class="modal-avatar" id="modalAvatar"></div>
+      <div>
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-folio" id="modalFolio"></div>
+      </div>
+      <div class="status-pill" id="modalStatus" style="margin-left:auto;">
+        <span class="dot"></span><span id="modalStatusLabel"></span>
+      </div>
+    </div>
+
+    <div class="modal-info-grid" id="modalInfoGrid"></div>
+
+    <div class="modal-section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      Archivos del paciente
+    </div>
+    <div class="year-tabs" id="yearTabs"></div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script>
+  const tbody = document.getElementById('patTableBody');
+  const search = document.getElementById('searchInput');
+  const myOrders = RADYEX.getOrdersByDoctor(RADYEX.CURRENT_DOCTOR_ID);
+
+  function render(){
+    const q = search.value.trim().toLowerCase();
+    document.getElementById('patBadge').textContent = myOrders.length;
+
+    const rows = myOrders.filter(o => o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q));
+
+    tbody.innerHTML = rows.map(o => {
+      const s = RADYEX.STATUS_MAP[o.status];
+      return `
+      <tr data-code="${o.code}">
+        <td>
+          <div class="cell-person">
+            <div class="mini-avatar">${o.init}</div>
+            <div><div class="cell-person-name">${o.name}</div><div class="cell-person-sub">${o.age} años · ${o.loc}</div></div>
+          </div>
+        </td>
+        <td><div style="font-weight:600;color:var(--ink);">${o.phone}</div><div class="cell-person-sub">${o.email}</div></td>
+        <td>${o.code}</td>
+        <td><span class="status-pill ${s.cls}"><span class="dot"></span>${s.label}</span></td>
+        <td>${RADYEX.countFiles(o)} archivo${RADYEX.countFiles(o) === 1 ? '' : 's'}</td>
+        <td>
+          <div class="table-actions">
+            <button class="table-action" title="Ver expediente" aria-label="Ver expediente">${RADYEX.ICONS.eye}</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No encontramos pacientes con esos criterios.</div></td></tr>`;
+    }
+
+    tbody.querySelectorAll('tr[data-code]').forEach(row => {
+      row.addEventListener('click', () => openModal(RADYEX.getOrderByCode(row.dataset.code)));
+    });
+  }
+  search.addEventListener('input', render);
+
+  /* ====== Modal ====== */
+  const overlay = document.getElementById('modalOverlay');
+
+  function infoItem(iconKey, label, value){
+    return `
+      <div class="info-item">
+        <div class="info-icon">${RADYEX.ICONS[iconKey]}</div>
+        <div>
+          <div class="info-label">${label}</div>
+          <div class="info-value">${value}</div>
+        </div>
+      </div>`;
+  }
+
+  function openModal(o){
+    document.getElementById('modalAvatar').textContent = o.init;
+    document.getElementById('modalName').textContent = o.name;
+    document.getElementById('modalFolio').textContent = `${o.code} · ${o.loc}`;
+
+    const s = RADYEX.STATUS_MAP[o.status];
+    document.getElementById('modalStatusLabel').textContent = s.label;
+    document.getElementById('modalStatus').className = `status-pill ${s.cls}`;
+
+    document.getElementById('modalInfoGrid').innerHTML =
+      infoItem('phone', 'Teléfono', o.phone) +
+      infoItem('mail', 'Correo', o.email) +
+      infoItem('age', 'Edad', o.age + ' años') +
+      infoItem('since', 'Paciente desde', o.since) +
+      infoItem('study', 'Tipo de estudio', o.studyType) +
+      infoItem('doctor', 'Referido por', 'Ti (' + RADYEX.getCurrentDoctor().name + ')');
+
+    renderYearTabs(o);
+    overlay.classList.add('open');
+  }
+
+  function renderYearTabs(o){
+    const years = Object.keys(o.files).sort((a,b)=>b-a);
+    const tabsEl = document.getElementById('yearTabs');
+    if (years.length === 0){
+      tabsEl.innerHTML = '';
+      document.getElementById('fileList').innerHTML = `<div class="file-empty">Aún no hay archivos cargados para este paciente.</div>`;
+      return;
+    }
+    tabsEl.innerHTML = years.map((y,i)=>`<button class="year-tab ${i===0?'active':''}" data-year="${y}">${y}</button>`).join('');
+    renderFiles(o, years[0]);
+    tabsEl.querySelectorAll('.year-tab').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        tabsEl.querySelectorAll('.year-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        renderFiles(o, tab.dataset.year);
+      });
+    });
+  }
+
+  function renderFiles(o, year){
+    const filesEl = document.getElementById('fileList');
+    const files = o.files[year] || [];
+    if(files.length === 0){
+      filesEl.innerHTML = `<div class="file-empty">Aún no hay archivos cargados para ${year}.</div>`;
+      return;
+    }
+    filesEl.innerHTML = files.map(f => `
+      <div class="file-row">
+        <div class="file-icon">${RADYEX.ICONS.file}</div>
+        <div>
+          <div class="file-name">${f.name}</div>
+          <div class="file-date">${f.date}</div>
+        </div>
+        <div class="file-row-actions">
+          <button class="file-action" title="Ver archivo" aria-label="Ver archivo" data-action="ver" data-name="${f.name}" data-date="${f.date}" data-src="${f.src}">${RADYEX.ICONS.eye}</button>
+          <button class="file-action" title="Descargar archivo" aria-label="Descargar archivo" data-action="descargar" data-name="${f.name}" data-date="${f.date}" data-src="${f.src}">${RADYEX.ICONS.download}</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function closeModal(){ overlay.classList.remove('open'); }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); });
+
+  /* ====== Ver / descargar archivo ====== */
+  document.getElementById('fileList').addEventListener('click', e => {
+    const btn = e.target.closest('.file-action');
+    if (!btn) return;
+    const file = { name: btn.dataset.name, date: btn.dataset.date, src: btn.dataset.src };
+    if (btn.dataset.action === 'descargar') RADYEX.downloadFile(file);
+    else RADYEX.openFileViewer(file);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  render();
+</script>
+
+</body>
+</html>

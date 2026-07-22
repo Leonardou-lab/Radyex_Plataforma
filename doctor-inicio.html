@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADYEX — Inicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>@media (max-width:880px){#homeGrid{grid-template-columns:1fr !important;}}</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-text">RADYEX<span>Radiología dental</span></div>
+    </div>
+    <div class="role-tag">Doctor referente</div>
+
+    <div class="nav-section-label">Menú</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;">
+      <a class="navitem active" href="doctor-inicio.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a class="navitem" href="doctor-ordenes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        <span>Mis órdenes</span>
+      </a>
+      <a class="navitem" href="doctor-pacientes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+        <span>Pacientes</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">PN</div>
+        <div>
+          <div class="sidebar-user-name">Dra. Patricia Núñez</div>
+          <div class="sidebar-user-role">Doctora referente</div>
+        </div>
+      </div>
+      <a class="navitem" href="index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Salir</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Hola, Dra. Núñez</div>
+        <div class="page-sub">Este es el resumen de tus órdenes y pacientes</div>
+      </div>
+      <div class="topbar-actions">
+        <a class="btn-primary" href="doctor-nueva-orden.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nueva orden
+        </a>
+        <div class="avatar">PN</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="stats" id="statsGrid"></div>
+
+      <div id="homeGrid" style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;">
+
+        <div class="panel">
+          <div class="panel-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+            Tus órdenes recientes
+          </div>
+          <div class="panel-sub">Últimas solicitudes de estudio para tus pacientes.</div>
+          <div class="order-list" id="recentList"></div>
+          <a href="doctor-ordenes.html" class="btn-ghost" style="margin-top:12px;">Ver todas mis órdenes →</a>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            ¿Qué puedes hacer aquí?
+          </div>
+          <div class="panel-sub">Tu acceso a RADYEX es de solo dos pasos.</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <a href="doctor-nueva-orden.html" style="text-decoration:none;color:inherit;display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--border);border-radius:12px;">
+              <div class="info-icon" style="margin-top:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+              <div><div style="font-weight:600;color:var(--ink);font-size:13.5px;">Solicitar una orden</div><div style="font-size:12.5px;color:var(--text-muted);margin-top:2px;">Pide un nuevo estudio para un paciente.</div></div>
+            </a>
+            <a href="doctor-pacientes.html" style="text-decoration:none;color:inherit;display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--border);border-radius:12px;">
+              <div class="info-icon" style="margin-top:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg></div>
+              <div><div style="font-weight:600;color:var(--ink);font-size:13.5px;">Consultar archivos</div><div style="font-size:12.5px;color:var(--text-muted);margin-top:2px;">Ve y descarga los estudios de tus pacientes.</div></div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="common.js"></script>
+<script>
+  const myOrders = RADYEX.getOrdersByDoctor(RADYEX.CURRENT_DOCTOR_ID);
+  const pending = myOrders.filter(o => o.status !== 'success');
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--pending-soft);color:var(--pending);">${RADYEX.ICONS.orders}</div>
+      <div><div class="stat-num">${myOrders.length}</div><div class="stat-label">Órdenes totales</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--warn-soft);color:var(--warn);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+      <div><div class="stat-num">${pending.length}</div><div class="stat-label">En proceso o pendientes</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--success-soft);color:var(--success);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m4 12 5 5 11-11"/></svg></div>
+      <div><div class="stat-num">${myOrders.filter(o=>o.status==='success').length}</div><div class="stat-label">Finalizadas</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--pending-soft);color:var(--ink-soft);">${RADYEX.ICONS.patients}</div>
+      <div><div class="stat-num">${myOrders.length}</div><div class="stat-label">Pacientes tuyos</div></div>
+    </div>
+  `;
+
+  const recentList = document.getElementById('recentList');
+  if (myOrders.length === 0){
+    recentList.innerHTML = `<div class="empty-state">Aún no tienes órdenes. Solicita la primera con "Nueva orden".</div>`;
+  } else {
+    recentList.innerHTML = myOrders.slice(0, 5).map(o => {
+      const s = RADYEX.STATUS_MAP[o.status];
+      return `
+        <div class="order-card status-${o.status}" style="cursor:default;">
+          <div class="order-avatar">${o.init}</div>
+          <div class="order-main">
+            <div class="order-name">${o.name}</div>
+            <div class="order-meta">
+              <div class="order-meta-item">${RADYEX.ICONS.study}${o.studyType}</div>
+              <div class="order-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>${o.date}</div>
+            </div>
+          </div>
+          <div class="status-pill ${s.cls}"><span class="dot"></span>${s.label}</div>
+        </div>`;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>
