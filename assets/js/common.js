@@ -39,8 +39,8 @@ const RADYEX = (function () {
   };
 
   /* ---------- PDFs de ejemplo (contenido genérico para el visor) ---------- */
-  const PDF_PACKAGE = "assets/ejemplos/ejemplo-paquete-estudio.pdf";
-  const PDF_SINGLE = "assets/ejemplos/ejemplo-radiografia.pdf";
+  const PDF_PACKAGE = "../assets/ejemplos/ejemplo-paquete-estudio.pdf";
+  const PDF_SINGLE = "../assets/ejemplos/ejemplo-radiografia.pdf";
 
   /* ---------- Semillas de datos (estado inicial de la demo) ---------- */
   const SEED_DOCTORS = [
@@ -130,7 +130,7 @@ const RADYEX = (function () {
 
   function resetState() {
     try { sessionStorage.removeItem(KEY); } catch (e) {}
-    window.location.href = "index.html";
+    window.location.href = "../index.html";
   }
 
   /* ---------- Utilidades de formato ---------- */

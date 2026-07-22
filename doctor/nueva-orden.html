@@ -6,7 +6,7 @@
 <title>RADYEX — Nueva orden</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
 
@@ -21,15 +21,15 @@
 
     <div class="nav-section-label">Menú</div>
     <nav style="display:flex;flex-direction:column;gap:2px;">
-      <a class="navitem" href="doctor-inicio.html">
+      <a class="navitem" href="inicio.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
         <span>Inicio</span>
       </a>
-      <a class="navitem active" href="doctor-ordenes.html">
+      <a class="navitem active" href="ordenes.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
         <span>Mis órdenes</span>
       </a>
-      <a class="navitem" href="doctor-pacientes.html">
+      <a class="navitem" href="pacientes.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
         <span>Pacientes</span>
       </a>
@@ -43,7 +43,7 @@
           <div class="sidebar-user-role">Doctora referente</div>
         </div>
       </div>
-      <a class="navitem" href="index.html">
+      <a class="navitem" href="../index.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
         <span>Salir</span>
       </a>
@@ -59,7 +59,7 @@
         <div class="page-sub">Solicita un estudio de radiología para tu paciente</div>
       </div>
       <div class="topbar-actions">
-        <a class="btn-secondary" href="doctor-ordenes.html">
+        <a class="btn-secondary" href="ordenes.html">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           Mis órdenes
         </a>
@@ -181,7 +181,7 @@
         <div class="page-sub" style="margin-bottom:20px;">Radyex procesará el estudio y te notificaremos cuando esté listo.</div>
         <div class="selected-chip" style="display:inline-flex;margin:0 0 24px;" id="confirmFolio"></div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-          <a class="btn-primary" href="doctor-ordenes.html">Ver en Mis órdenes</a>
+          <a class="btn-primary" href="ordenes.html">Ver en Mis órdenes</a>
           <button class="btn-secondary" id="anotherOrderBtn" type="button">Solicitar otra orden</button>
         </div>
       </div>
@@ -190,7 +190,7 @@
   </main>
 </div>
 
-<script src="common.js"></script>
+<script src="../assets/js/common.js"></script>
 <script>
   RADYEX.STUDY_TYPES.forEach(t => {
     const opt = document.createElement('option');
