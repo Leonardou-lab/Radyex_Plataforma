@@ -53,35 +53,35 @@ const RADYEX = (function () {
   const CURRENT_DOCTOR_ID = "dr-nunez";
 
   const SEED_ORDERS = [
-    { code: "LN251220015", name: "Omar Mateo Rosas Lara", init: "OR", loc: "Puebla", date: "20 dic 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía CBCT", priority: "Normal", phone: "222 145 7732", email: "omar.rosas@gmail.com", age: 34, since: "2023 · 3 años",
-      files: { 2025: [{ name: "Tomografía CBCT.pdf", date: "20 dic 2025" }], 2024: [{ name: "Radiografía panorámica.pdf", date: "14 mar 2024" }], 2023: [{ name: "Serie periapical.pdf", date: "02 feb 2023" }] } },
+    { code: "LN251220015", name: "Omar Mateo Rosas Lara", init: "OR", loc: "Puebla", date: "20 dic 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía 3D — 12×9", priority: "Normal", phone: "222 145 7732", email: "omar.rosas@gmail.com", age: 34, since: "2023 · 3 años",
+      files: { 2025: [{ name: "Tomografía 3D.pdf", date: "20 dic 2025" }], 2024: [{ name: "Panorámica.pdf", date: "14 mar 2024" }], 2023: [{ name: "Periapical (serie).pdf", date: "02 feb 2023" }] } },
 
-    { code: "LN251017016", name: "Marilú Méndez Martínez", init: "MM", loc: "Puebla", date: "17 oct 2025", status: "success", doctorId: "dr-cordero", studyType: "Radiografía panorámica", priority: "Normal", phone: "222 308 9912", email: "marilu.mendez@hotmail.com", age: 51, since: "2022 · 4 años",
-      files: { 2025: [{ name: "Radiografía panorámica.pdf", date: "17 oct 2025" }], 2023: [{ name: "Cefalométrica lateral.pdf", date: "11 may 2023" }], 2022: [{ name: "Serie periapical.pdf", date: "30 ago 2022" }] } },
+    { code: "LN251017016", name: "Marilú Méndez Martínez", init: "MM", loc: "Puebla", date: "17 oct 2025", status: "success", doctorId: "dr-cordero", studyType: "Panorámica", priority: "Normal", phone: "222 308 9912", email: "marilu.mendez@hotmail.com", age: 51, since: "2022 · 4 años",
+      files: { 2025: [{ name: "Panorámica.pdf", date: "17 oct 2025" }], 2023: [{ name: "Lateral de cráneo.pdf", date: "11 may 2023" }], 2022: [{ name: "Periapical (serie).pdf", date: "30 ago 2022" }] } },
 
-    { code: "LN250805010", name: "Luis Ángel Castillo Medellín", init: "LC", loc: "Puebla", date: "05 ago 2025", status: "warn", doctorId: "dr-solis", studyType: "Tomografía CBCT", priority: "Urgente", phone: "222 477 0156", email: "luis.castillo@outlook.com", age: 27, since: "2025 · 1 año",
-      files: { 2025: [{ name: "Tomografía CBCT (en proceso).pdf", date: "05 ago 2025" }] } },
+    { code: "LN250805010", name: "Luis Ángel Castillo Medellín", init: "LC", loc: "Puebla", date: "05 ago 2025", status: "warn", doctorId: "dr-solis", studyType: "Tomografía 3D — 16×9", priority: "Urgente", phone: "222 477 0156", email: "luis.castillo@outlook.com", age: 27, since: "2025 · 1 año",
+      files: { 2025: [{ name: "Tomografía 3D (en proceso).pdf", date: "05 ago 2025" }] } },
 
-    { code: "LN250802018", name: "Aline Daniela Vargas Sánchez", init: "AV", loc: "Puebla", date: "02 ago 2025", status: "success", doctorId: "dr-cordero", studyType: "Serie periapical", priority: "Normal", phone: "222 590 4423", email: "aline.vargas@gmail.com", age: 19, since: "2024 · 2 años",
-      files: { 2025: [{ name: "Serie periapical.pdf", date: "02 ago 2025" }], 2024: [{ name: "Radiografía panorámica.pdf", date: "19 nov 2024" }] } },
+    { code: "LN250802018", name: "Aline Daniela Vargas Sánchez", init: "AV", loc: "Puebla", date: "02 ago 2025", status: "success", doctorId: "dr-cordero", studyType: "Periapical", priority: "Normal", phone: "222 590 4423", email: "aline.vargas@gmail.com", age: 19, since: "2024 · 2 años",
+      files: { 2025: [{ name: "Periapical (serie).pdf", date: "02 ago 2025" }], 2024: [{ name: "Panorámica.pdf", date: "19 nov 2024" }] } },
 
-    { code: "TM250709012", name: "María Guadalupe Zarco Herrera", init: "MZ", loc: "Puebla", date: "09 jul 2025", status: "pending", doctorId: "dr-nunez", studyType: "Cefalométrica lateral", priority: "Normal", phone: "222 612 8870", email: "maria.zarco@gmail.com", age: 62, since: "2025 · nuevo",
+    { code: "TM250709012", name: "María Guadalupe Zarco Herrera", init: "MZ", loc: "Puebla", date: "09 jul 2025", status: "pending", doctorId: "dr-nunez", studyType: "Lateral de cráneo", priority: "Normal", phone: "222 612 8870", email: "maria.zarco@gmail.com", age: 62, since: "2025 · nuevo",
       files: { 2025: [] } },
 
-    { code: "LN250708008", name: "Giovanna Fernanda Flores Gómez", init: "GF", loc: "Puebla", date: "08 jul 2025", status: "success", doctorId: "dr-solis", studyType: "Tomografía CBCT", priority: "Normal", phone: "222 734 2298", email: "giovanna.flores@gmail.com", age: 29, since: "2023 · 3 años",
-      files: { 2025: [{ name: "Tomografía CBCT.pdf", date: "08 jul 2025" }], 2024: [{ name: "Radiografía panorámica.pdf", date: "22 ene 2024" }], 2023: [{ name: "Serie periapical.pdf", date: "15 jun 2023" }] } },
+    { code: "LN250708008", name: "Giovanna Fernanda Flores Gómez", init: "GF", loc: "Puebla", date: "08 jul 2025", status: "success", doctorId: "dr-solis", studyType: "Tomografía 3D — 12×9", priority: "Normal", phone: "222 734 2298", email: "giovanna.flores@gmail.com", age: 29, since: "2023 · 3 años",
+      files: { 2025: [{ name: "Tomografía 3D.pdf", date: "08 jul 2025" }], 2024: [{ name: "Panorámica.pdf", date: "22 ene 2024" }], 2023: [{ name: "Periapical (serie).pdf", date: "15 jun 2023" }] } },
 
-    { code: "LN250616002", name: "María Guillermina Alarcón de Martino", init: "MA", loc: "Puebla", date: "16 jun 2025", status: "warn", doctorId: "dr-cordero", studyType: "Radiografía panorámica", priority: "Normal", phone: "222 866 5541", email: "guille.alarcon@hotmail.com", age: 58, since: "2021 · 5 años",
-      files: { 2025: [{ name: "Radiografía panorámica (en proceso).pdf", date: "16 jun 2025" }], 2022: [{ name: "Tomografía CBCT.pdf", date: "03 sep 2022" }], 2021: [{ name: "Serie periapical.pdf", date: "10 abr 2021" }] } },
+    { code: "LN250616002", name: "María Guillermina Alarcón de Martino", init: "MA", loc: "Puebla", date: "16 jun 2025", status: "warn", doctorId: "dr-cordero", studyType: "Panorámica", priority: "Normal", phone: "222 866 5541", email: "guille.alarcon@hotmail.com", age: 58, since: "2021 · 5 años",
+      files: { 2025: [{ name: "Panorámica (en proceso).pdf", date: "16 jun 2025" }], 2022: [{ name: "Tomografía 3D.pdf", date: "03 sep 2022" }], 2021: [{ name: "Periapical (serie).pdf", date: "10 abr 2021" }] } },
 
-    { code: "TM250602018", name: "Damiana Uscanga Guadarrama", init: "DU", loc: "Puebla", date: "02 jun 2025", status: "pending", doctorId: "dr-solis", studyType: "Serie periapical", priority: "Normal", phone: "222 901 3387", email: "damiana.uscanga@gmail.com", age: 41, since: "2025 · nuevo",
+    { code: "TM250602018", name: "Damiana Uscanga Guadarrama", init: "DU", loc: "Puebla", date: "02 jun 2025", status: "pending", doctorId: "dr-solis", studyType: "Periapical", priority: "Normal", phone: "222 901 3387", email: "damiana.uscanga@gmail.com", age: 41, since: "2025 · nuevo",
       files: { 2025: [] } },
 
-    { code: "LN250520011", name: "Fernando Iván Rosales Pacheco", init: "FR", loc: "Puebla", date: "20 may 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía CBCT", priority: "Normal", phone: "222 220 6634", email: "fernando.rosales@gmail.com", age: 45, since: "2022 · 4 años",
-      files: { 2025: [{ name: "Tomografía CBCT.pdf", date: "20 may 2025" }], 2022: [{ name: "Radiografía panorámica.pdf", date: "11 feb 2022" }] } },
+    { code: "LN250520011", name: "Fernando Iván Rosales Pacheco", init: "FR", loc: "Puebla", date: "20 may 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía 3D — 12×9", priority: "Normal", phone: "222 220 6634", email: "fernando.rosales@gmail.com", age: 45, since: "2022 · 4 años",
+      files: { 2025: [{ name: "Tomografía 3D.pdf", date: "20 may 2025" }], 2022: [{ name: "Panorámica.pdf", date: "11 feb 2022" }] } },
 
-    { code: "LN250415009", name: "Karla Sofía Domínguez Reyes", init: "KD", loc: "Puebla", date: "15 abr 2025", status: "warn", doctorId: "dr-nunez", studyType: "Serie periapical", priority: "Normal", phone: "222 349 7712", email: "karla.dominguez@outlook.com", age: 24, since: "2024 · 2 años",
-      files: { 2025: [{ name: "Serie periapical (en proceso).pdf", date: "15 abr 2025" }], 2024: [{ name: "Radiografía panorámica.pdf", date: "03 sep 2024" }] } },
+    { code: "LN250415009", name: "Karla Sofía Domínguez Reyes", init: "KD", loc: "Puebla", date: "15 abr 2025", status: "warn", doctorId: "dr-nunez", studyType: "Periapical", priority: "Normal", phone: "222 349 7712", email: "karla.dominguez@outlook.com", age: 24, since: "2024 · 2 años",
+      files: { 2025: [{ name: "Periapical (serie) (en proceso).pdf", date: "15 abr 2025" }], 2024: [{ name: "Panorámica.pdf", date: "03 sep 2024" }] } },
   ];
 
   /* Añade el PDF de ejemplo correspondiente a cada archivo semilla: el estudio
@@ -105,7 +105,127 @@ const RADYEX = (function () {
     pending: { label: "Pendiente", cls: "pending" },
   };
 
-  const STUDY_TYPES = ["Tomografía CBCT", "Radiografía panorámica", "Serie periapical", "Cefalométrica lateral"];
+  /* ---------- Catálogo de estudios (transcrito de docs/orden-de-estudio.md) ----------
+     Fuente de verdad del formulario "Nueva orden" del doctor. Cada categoría agrupa
+     los estudios tal como aparecen en la orden de papel. */
+  const STUDY_CATEGORIES = [
+    {
+      id: "intraorales",
+      label: "Radiografías intraorales",
+      items: [
+        { id: "periapical", label: "Periapical", teeth: true },
+        { id: "oclusal", label: "Oclusal" },
+        { id: "superior", label: "Superior" },
+        { id: "inferior", label: "Inferior" },
+        { id: "aleta", label: "Aleta de mordida" },
+      ],
+    },
+    {
+      id: "extraorales",
+      label: "Radiografías extraorales",
+      items: [
+        { id: "panoramica", label: "Panorámica" },
+        { id: "lateral-craneo", label: "Lateral de cráneo" },
+        { id: "full-lateral", label: "Full lateral" },
+        { id: "carpal", label: "Carpal" },
+        { id: "pa-craneo", label: "P.A. de cráneo" },
+        { id: "ap-craneo", label: "A.P. de cráneo" },
+        { id: "waters", label: "Waters" },
+        { id: "atm", label: "A.T.M." },
+        { id: "towne", label: "Towne" },
+        { id: "hirtz", label: "Hirtz" },
+        { id: "senos", label: "Senos paranasales (Cadwell)" },
+        { id: "anteposterior", label: "Anteposterior" },
+      ],
+    },
+    {
+      id: "fotografias",
+      label: "Fotografías (intraoral / extraoral)",
+      items: [
+        { id: "foto-papel", label: "Papel fotográfico" },
+        { id: "foto-digital", label: "Digital" },
+      ],
+    },
+    {
+      id: "modelos",
+      label: "Modelos",
+      items: [
+        { id: "modelo-estudio", label: "Estudio" },
+        { id: "modelo-trabajo", label: "Trabajo" },
+        { id: "modelo-3d", label: "Impreso 3D" },
+        { id: "escaneo-intraoral", label: "Escaneo intraoral (3Shape / Invisalign)" },
+      ],
+    },
+    {
+      id: "cefalometria",
+      label: "Cefalometría computarizada",
+      items: [
+        { id: "cef-ricketts", label: "Ricketts" },
+        { id: "cef-steiner", label: "Steiner" },
+        { id: "cef-macnamara", label: "Mac Namara" },
+        { id: "cef-tweed", label: "Tweed" },
+        { id: "cef-jarabak", label: "Jarabak" },
+        { id: "cef-rothjarabak", label: "Roth-Jarabak" },
+        { id: "cef-downs", label: "Downs" },
+        { id: "cef-ricketts-resumido", label: "Ricketts resumido" },
+        { id: "cef-pa-craneo", label: "Cefalometría P.A. de cráneo" },
+        { id: "cef-otro", label: "Otro", note: true },
+      ],
+    },
+  ];
+
+  /* Radiografías periapicales: nomenclatura FDI por arcada, tal como en el papel. */
+  const DIENTES_FDI = {
+    infantil: [
+      ["55", "54", "53", "52", "51"],
+      ["61", "62", "63", "64", "65"],
+      ["85", "84", "83", "82", "81"],
+      ["71", "72", "73", "74", "75"],
+    ],
+    adulto: [
+      ["18", "17", "16", "15", "14", "13", "12", "11"],
+      ["21", "22", "23", "24", "25", "26", "27", "28"],
+      ["48", "47", "46", "45", "44", "43", "42", "41"],
+      ["31", "32", "33", "34", "35", "36", "37", "38"],
+    ],
+  };
+
+  /* Tomografía 3D: cada FOV con su texto de ayuda, tal como en el papel. */
+  const TOMOGRAFIA_FOV = [
+    { value: "16x9", label: "16 × 9", help: "Óptimo para Dx de sinusitis y A.T.M." },
+    { value: "12x9", label: "12 × 9", help: "Óptimo para cubrir todo el arco dental" },
+    { value: "8x9", label: "8 × 9", help: "Óptimo para selección de arco izquierdo, derecho y central" },
+    { value: "8x5", label: "8 × 5", help: "Óptimo para cubrir arco superior o inferior" },
+    { value: "5x5", label: "5 × 5", help: "Óptimo para cubrir de 3 a 4 dientes", zona: true },
+  ];
+
+  /* Paquetes: selección rápida que marca automáticamente los estudios que lo componen. */
+  const PAQUETES = [
+    {
+      id: "ortodoncia",
+      label: "Ortodoncia",
+      desc: "Panorámica + lateral de cráneo + cefalometría + fotografías + modelos",
+      items: ["panoramica", "lateral-craneo", "cef-ricketts", "foto-digital", "modelo-estudio"],
+    },
+    {
+      id: "diagnostico",
+      label: "Diagnóstico",
+      desc: "Panorámica + fotografías + modelos",
+      items: ["panoramica", "foto-digital", "modelo-estudio"],
+    },
+    {
+      id: "implantologia",
+      label: "Implantología",
+      desc: "Tomografía + guía quirúrgica (diseño e impresión) + modelos + escaneos 3D",
+      items: ["escaneo-intraoral"],
+      fov: "12x9",
+      nota: "Incluye diseño e impresión de guía quirúrgica (lo coordina Radyex).",
+    },
+  ];
+
+  /* Catálogo plano (para selects sencillos como "Subir archivos") derivado de las categorías. */
+  const STUDY_TYPES = STUDY_CATEGORIES.flatMap(cat => cat.items.filter(i => !i.note).map(i => i.label))
+    .concat(TOMOGRAFIA_FOV.map(f => `Tomografía 3D — ${f.label}`));
 
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
@@ -150,6 +270,17 @@ const RADYEX = (function () {
     prefix = prefix || (Math.random() < 0.5 ? "LN" : "TM");
     const seq = pad2(Math.floor(Math.random() * 90) + 10) + Math.floor(Math.random() * 9);
     return `${prefix}${folioDatePart()}${seq}`;
+  }
+
+  function calcAge(birthDateStr) {
+    const birth = new Date(birthDateStr + "T12:00:00");
+    if (isNaN(birth)) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const beforeBirthday = today.getMonth() < birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
+    if (beforeBirthday) age--;
+    return age;
   }
 
   function initials(fullName) {
@@ -279,10 +410,10 @@ const RADYEX = (function () {
 
   /* ---------- API pública ---------- */
   return {
-    ICONS, STATUS_MAP, STUDY_TYPES, CURRENT_DOCTOR_ID,
+    ICONS, STATUS_MAP, STUDY_TYPES, STUDY_CATEGORIES, DIENTES_FDI, TOMOGRAFIA_FOV, PAQUETES, CURRENT_DOCTOR_ID,
     getDoctors, getDoctorById, getCurrentDoctor, addDoctor,
     getOrders, getOrdersByDoctor, getOrderByCode, addOrder, addFileToOrder, countFiles,
-    formatDateEs, generateFolio, initials, suggestUsername, generatePassword,
+    formatDateEs, generateFolio, initials, suggestUsername, generatePassword, calcAge,
     resetState, openFileViewer, downloadFile,
   };
 })();

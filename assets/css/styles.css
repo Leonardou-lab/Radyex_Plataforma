@@ -294,6 +294,46 @@ input::placeholder, textarea::placeholder{color:#9AA6BD;}
 .radio-pill.checked{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);}
 .radio-pill.urgent.checked{border-color:var(--warn);background:var(--warn-soft);color:var(--warn);}
 
+/* Selector de estudios (nueva orden del doctor) */
+.package-row{display:flex;gap:12px;flex-wrap:wrap;}
+.package-btn{
+  flex:1;min-width:200px;text-align:left;border:1.5px solid var(--border);border-radius:14px;
+  background:var(--surface);padding:14px 16px;cursor:pointer;transition:all .15s ease;
+}
+.package-btn:hover{border-color:var(--accent);}
+.package-btn.active{border-color:var(--accent);background:var(--accent-soft);}
+.package-btn-title{font-family:'Lexend',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.package-btn-desc{font-size:11.5px;color:var(--text-muted);margin-top:5px;line-height:1.45;}
+
+.study-section{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);}
+.study-section-title{font-family:'Lexend',sans-serif;font-weight:600;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.study-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px 18px;}
+
+.study-subpanel{margin-top:14px;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;}
+.tooth-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:10px;}
+.tooth-row:last-child{margin-bottom:0;}
+.tooth-row-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;width:100%;margin-bottom:2px;}
+.tooth-chip{
+  border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;
+  font-size:11.5px;font-weight:600;padding:4px 7px;border-radius:6px;min-width:28px;text-align:center;
+  transition:all .12s ease;
+}
+.tooth-chip:hover{border-color:var(--accent);}
+.tooth-chip.selected{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tooth-sep{width:1px;align-self:stretch;background:var(--border);margin:0 3px;}
+.tooth-dot-sep{color:var(--text-muted);font-weight:700;margin:0 4px;}
+
+.fov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.fov-card{
+  border:1.5px solid var(--border);border-radius:12px;padding:13px 14px 12px;cursor:pointer;
+  background:var(--surface);transition:all .15s ease;
+}
+.fov-card:hover{border-color:var(--accent);}
+.fov-card.checked{border-color:var(--accent);background:var(--accent-soft);}
+.fov-card-title{font-family:'Lexend',sans-serif;font-weight:700;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.fov-card-title input{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;}
+.fov-card-help{font-size:11.5px;color:var(--text-muted);margin-top:5px;line-height:1.4;padding-left:23px;}
+
 /* Combobox de búsqueda (doctor / paciente) */
 .combobox{position:relative;}
 .search-results{
@@ -519,6 +559,8 @@ input::placeholder, textarea::placeholder{color:#9AA6BD;}
   .modal-info-grid{grid-template-columns:1fr;}
   .field-row{grid-template-columns:1fr;}
   .role-cards{grid-template-columns:1fr;}
+  .package-row{flex-direction:column;}
+  .study-grid, .fov-grid{grid-template-columns:1fr;}
   .data-table{font-size:12.5px;}
 }
 

@@ -56,7 +56,7 @@
     <div class="topbar">
       <div>
         <div class="page-title">Nueva orden</div>
-        <div class="page-sub">Solicita un estudio de radiología para tu paciente</div>
+        <div class="page-sub">Solicita los estudios que necesitas para tu paciente</div>
       </div>
       <div class="topbar-actions">
         <a class="btn-secondary" href="ordenes.html">
@@ -67,105 +67,135 @@
       </div>
     </div>
 
-    <div class="content content-narrow">
+    <div class="content">
 
       <!-- ====== Formulario ====== -->
-      <div class="panel" id="formPanel">
-        <div class="panel-title">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
-          Datos de la solicitud
-        </div>
-        <div class="panel-sub">Completa la información y Radyex procesará tu estudio.</div>
+      <div id="formPanel">
 
         <form id="orderForm" novalidate>
 
-          <!-- Paciente -->
-          <div class="field">
-            <label class="field-label">Paciente</label>
+          <!-- ====== Datos del doctor ====== -->
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-title">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg>
+              Datos del doctor
+            </div>
+            <div class="panel-sub" id="fechaEncabezado"></div>
 
-            <div id="existingPatientBlock">
-              <div class="combobox">
-                <div class="input-with-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                  <input type="text" id="patSearch" placeholder="Buscar entre tus pacientes..." autocomplete="off">
-                </div>
-                <div class="search-results" id="patResults"></div>
+            <div class="field" id="f-docName">
+              <label class="field-label" for="docName">Dr. / Dra.</label>
+              <input type="text" id="docName" placeholder="Nombre del doctor">
+              <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa el nombre del doctor.</div>
+            </div>
+
+            <div class="field-row">
+              <div class="field" id="f-docEmail">
+                <label class="field-label" for="docEmail">Email</label>
+                <input type="email" id="docEmail" placeholder="doctor@correo.com">
+                <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa un email.</div>
               </div>
-              <div id="patSelectedWrap"></div>
-              <button type="button" class="btn-ghost" id="toggleNewPatient" style="margin-top:10px;padding-left:0;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                + Nuevo paciente
-              </button>
-            </div>
-
-            <div id="newPatientBlock" style="display:none;">
-              <div class="field-row">
-                <div class="field" id="f-npName" style="margin-bottom:14px;">
-                  <label class="field-label" for="npName">Nombre completo</label>
-                  <input type="text" id="npName" placeholder="Nombre del paciente">
-                  <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa el nombre del paciente.</div>
-                </div>
-                <div class="field" id="f-npAge" style="margin-bottom:14px;">
-                  <label class="field-label" for="npAge">Edad</label>
-                  <input type="number" id="npAge" min="0" max="120" placeholder="Ej. 34">
-                  <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa la edad.</div>
-                </div>
+              <div class="field" id="f-docWhatsapp">
+                <label class="field-label" for="docWhatsapp">WhatsApp</label>
+                <input type="tel" id="docWhatsapp" placeholder="222 000 0000">
+                <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa un WhatsApp.</div>
               </div>
-              <div class="field-row">
-                <div class="field" id="f-npPhone" style="margin-bottom:8px;">
-                  <label class="field-label" for="npPhone">Teléfono</label>
-                  <input type="tel" id="npPhone" placeholder="222 000 0000">
-                  <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa un teléfono.</div>
-                </div>
-                <div class="field" id="f-npEmail" style="margin-bottom:8px;">
-                  <label class="field-label" for="npEmail">Correo <span class="opt">(opcional)</span></label>
-                  <input type="email" id="npEmail" placeholder="paciente@correo.com">
-                </div>
+            </div>
+
+            <div class="field" id="f-docIndicaciones">
+              <label class="field-label" for="docIndicaciones">Indicaciones</label>
+              <textarea id="docIndicaciones" placeholder="Ej. Valoración previa a tratamiento de ortodoncia, dolor en zona molar inferior derecha..."></textarea>
+              <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Describe brevemente las indicaciones.</div>
+            </div>
+
+            <div class="field" style="margin-bottom:0;">
+              <label class="field-label">Entrega</label>
+              <div class="radio-pills">
+                <label class="radio-pill" id="pillImpreso">
+                  <input type="radio" name="entrega" value="Impreso"> Impreso
+                </label>
+                <label class="radio-pill" id="pillDigital">
+                  <input type="radio" name="entrega" value="Digital"> Digital
+                </label>
               </div>
-              <button type="button" class="btn-ghost" id="toggleExistingPatient" style="padding-left:0;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                Elegir un paciente existente
-              </button>
-            </div>
-
-            <div class="field-error" id="patientGlobalError" style="margin-top:8px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Selecciona un paciente o registra uno nuevo.
+              <div class="field-error" id="entregaError" style="margin-top:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Elige cómo se entregará el estudio.</div>
             </div>
           </div>
 
-          <!-- Tipo de estudio -->
-          <div class="field" id="f-studyType">
-            <label class="field-label" for="studyType">Tipo de estudio</label>
-            <select id="studyType">
-              <option value="">Selecciona un tipo de estudio</option>
-            </select>
-            <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Selecciona el tipo de estudio.</div>
-          </div>
+          <!-- ====== Datos del paciente ====== -->
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-title">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+              Datos del paciente
+            </div>
+            <div class="panel-sub">Busca a un paciente que ya has referido o registra uno nuevo.</div>
 
-          <!-- Indicaciones clínicas -->
-          <div class="field" id="f-notes">
-            <label class="field-label" for="notes">Indicaciones clínicas / motivo</label>
-            <textarea id="notes" placeholder="Ej. Valoración previa a tratamiento de ortodoncia, dolor en zona molar inferior derecha..."></textarea>
-            <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Describe brevemente el motivo del estudio.</div>
-          </div>
+            <div class="field" style="margin-bottom:0;">
+              <div id="existingPatientBlock">
+                <div class="combobox">
+                  <div class="input-with-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="patSearch" placeholder="Buscar entre tus pacientes..." autocomplete="off">
+                  </div>
+                  <div class="search-results" id="patResults"></div>
+                </div>
+                <div id="patSelectedWrap"></div>
+                <button type="button" class="btn-ghost" id="toggleNewPatient" style="margin-top:10px;padding-left:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  + Nuevo paciente
+                </button>
+              </div>
 
-          <!-- Prioridad + fecha -->
-          <div class="field">
-            <label class="field-label">Prioridad</label>
-            <div class="radio-pills">
-              <label class="radio-pill checked" id="pillNormal">
-                <input type="radio" name="priority" value="Normal" checked> Normal
-              </label>
-              <label class="radio-pill urgent" id="pillUrgente">
-                <input type="radio" name="priority" value="Urgente"> Urgente
-              </label>
+              <div id="newPatientBlock" style="display:none;">
+                <div class="field-row">
+                  <div class="field" id="f-npName" style="margin-bottom:14px;">
+                    <label class="field-label" for="npName">Paciente (nombre)</label>
+                    <input type="text" id="npName" placeholder="Nombre del paciente">
+                    <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa el nombre del paciente.</div>
+                  </div>
+                  <div class="field" id="f-npBirth" style="margin-bottom:14px;">
+                    <label class="field-label" for="npBirth">Fecha de nacimiento</label>
+                    <input type="date" id="npBirth">
+                    <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa la fecha de nacimiento.</div>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field" id="f-npWhatsapp" style="margin-bottom:8px;">
+                    <label class="field-label" for="npWhatsapp">WhatsApp</label>
+                    <input type="tel" id="npWhatsapp" placeholder="222 000 0000">
+                    <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa un WhatsApp.</div>
+                  </div>
+                  <div class="field" id="f-npEmail" style="margin-bottom:8px;">
+                    <label class="field-label" for="npEmail">Email <span class="opt">(opcional)</span></label>
+                    <input type="email" id="npEmail" placeholder="paciente@correo.com">
+                  </div>
+                </div>
+                <button type="button" class="btn-ghost" id="toggleExistingPatient" style="padding-left:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+                  Elegir un paciente existente
+                </button>
+              </div>
+
+              <div class="field-error" id="patientGlobalError" style="margin-top:8px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Selecciona un paciente o registra uno nuevo.
+              </div>
             </div>
           </div>
 
-          <div class="field" id="f-date">
-            <label class="field-label" for="desiredDate">Fecha deseada</label>
-            <input type="date" id="desiredDate">
-            <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Elige una fecha deseada.</div>
+          <!-- ====== Estudios ====== -->
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-title">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Estudios que se solicitan
+            </div>
+            <div class="panel-sub">Elige un paquete para marcar sus estudios automáticamente, o selecciónalos uno por uno.</div>
+
+            <div class="package-row" id="packageRow" style="margin-bottom:22px;"></div>
+
+            <div id="studySections" style="display:flex;flex-direction:column;gap:16px;"></div>
+
+            <div class="field-error" id="studiesGlobalError" style="margin-top:14px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Selecciona al menos un estudio.
+            </div>
           </div>
 
           <button type="submit" class="btn-primary btn-block">Enviar solicitud</button>
@@ -192,11 +222,11 @@
 
 <script src="../assets/js/common.js"></script>
 <script>
-  RADYEX.STUDY_TYPES.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t; opt.textContent = t;
-    document.getElementById('studyType').appendChild(opt);
-  });
+  const currentDoctor = RADYEX.getCurrentDoctor();
+  document.getElementById('fechaEncabezado').textContent = `Fecha: ${RADYEX.formatDateEs()}`;
+  document.getElementById('docName').value = currentDoctor.name;
+  document.getElementById('docEmail').value = currentDoctor.email;
+  document.getElementById('docWhatsapp').value = currentDoctor.phone;
 
   const myOrders = RADYEX.getOrdersByDoctor(RADYEX.CURRENT_DOCTOR_ID);
   let selectedOrder = null;
@@ -261,27 +291,213 @@
     existingBlock.style.display = 'block';
   });
 
-  /* ---------- Prioridad ---------- */
-  document.querySelectorAll('input[name=priority]').forEach(radio => {
+  /* ---------- Entrega ---------- */
+  document.querySelectorAll('input[name=entrega]').forEach(radio => {
     radio.addEventListener('change', () => {
-      document.getElementById('pillNormal').classList.toggle('checked', radio.value === 'Normal' && radio.checked);
-      document.getElementById('pillUrgente').classList.toggle('checked', radio.value === 'Urgente' && radio.checked);
+      document.getElementById('pillImpreso').classList.toggle('checked', radio.value === 'Impreso' && radio.checked);
+      document.getElementById('pillDigital').classList.toggle('checked', radio.value === 'Digital' && radio.checked);
     });
   });
 
-  const desiredDate = document.getElementById('desiredDate');
-  desiredDate.min = new Date().toISOString().split('T')[0];
+  /* ==========================================================
+     Estudios: se arman dinámicamente desde RADYEX.STUDY_CATEGORIES
+     para que el catálogo viva en un solo lugar (common.js).
+     ========================================================== */
+  const alertSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+
+  function toothRow(labelText, quadrants){
+    const chips = q => q.map(t => `<button type="button" class="tooth-chip" data-tooth="${t}">${t}</button>`).join('');
+    return `<div class="tooth-row">
+      <span class="tooth-row-label">${labelText}</span>
+      ${chips(quadrants[0])}<span class="tooth-sep"></span>${chips(quadrants[1])}<span class="tooth-dot-sep">·</span>${chips(quadrants[2])}<span class="tooth-sep"></span>${chips(quadrants[3])}
+    </div>`;
+  }
+
+  function periapicalPanelHTML(){
+    return `<div class="study-subpanel" id="periapicalPanel" style="display:none;">
+      <div class="radio-pills" style="margin-bottom:14px;">
+        <label class="radio-pill checked" id="pillSensor"><input type="radio" name="periapicalTipo" value="Sensor" checked> Sensor</label>
+        <label class="radio-pill" id="pillRX"><input type="radio" name="periapicalTipo" value="RX"> RX</label>
+      </div>
+      ${toothRow('Infantil', RADYEX.DIENTES_FDI.infantil)}
+      ${toothRow('Adulto', RADYEX.DIENTES_FDI.adulto)}
+      <div class="field-error" id="periapicalTeethError" style="margin-top:2px;">${alertSvg} Selecciona al menos un diente.</div>
+    </div>`;
+  }
+
+  function cefOtroPanelHTML(){
+    return `<div class="field" id="f-cefOtro" style="margin:10px 0 0;display:none;">
+      <input type="text" id="cefOtroTexto" placeholder="Especifica la técnica de cefalometría">
+      <div class="field-error">${alertSvg} Especifica la técnica.</div>
+    </div>`;
+  }
+
+  const studySections = document.getElementById('studySections');
+  let sectionsHtml = '';
+
+  RADYEX.STUDY_CATEGORIES.forEach(cat => {
+    const itemsHtml = cat.items.map(item => {
+      const idAttr = item.teeth ? ' id="chkPeriapical"' : (item.note ? ' id="chkCefOtro"' : '');
+      const checkbox = `<label class="checkbox-row"><input type="checkbox" class="study-check" data-study="${item.id}" data-label="${item.label}"${idAttr}><span>${item.label}</span></label>`;
+      if (!item.teeth && !item.note) return checkbox;
+      const extra = item.teeth ? periapicalPanelHTML() : cefOtroPanelHTML();
+      return `<div style="grid-column:1/-1;">${checkbox}${extra}</div>`;
+    }).join('');
+    sectionsHtml += `<div class="study-section">
+      <div class="study-section-title">${RADYEX.ICONS.study} ${cat.label}</div>
+      <div class="study-grid">${itemsHtml}</div>
+    </div>`;
+  });
+
+  sectionsHtml += `<div class="study-section">
+    <div class="study-section-title">${RADYEX.ICONS.study} Tomografía 3D (elegir FOV)</div>
+    <div class="fov-grid">
+      ${RADYEX.TOMOGRAFIA_FOV.map(f => `
+        <label class="fov-card" data-fov="${f.value}">
+          <div class="fov-card-title"><input type="radio" name="fov" value="${f.value}"> ${f.label}</div>
+          <div class="fov-card-help">${f.help}</div>
+        </label>
+      `).join('')}
+    </div>
+    <div class="field" id="f-fovZona" style="margin:14px 0 0;display:none;">
+      <label class="field-label" for="fovZona">Zona a cubrir</label>
+      <input type="text" id="fovZona" placeholder="Ej. Molares superiores derechos">
+      <div class="field-error">${alertSvg} Indica la zona a cubrir.</div>
+    </div>
+  </div>`;
+
+  studySections.innerHTML = sectionsHtml;
+
+  /* ---------- Periapical: Sensor/RX + dientes ---------- */
+  const chkPeriapical = document.getElementById('chkPeriapical');
+  const periapicalPanel = document.getElementById('periapicalPanel');
+  chkPeriapical.addEventListener('change', () => {
+    periapicalPanel.style.display = chkPeriapical.checked ? 'block' : 'none';
+    updatePackageStates();
+  });
+  document.querySelectorAll('input[name=periapicalTipo]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.getElementById('pillSensor').classList.toggle('checked', radio.value === 'Sensor' && radio.checked);
+      document.getElementById('pillRX').classList.toggle('checked', radio.value === 'RX' && radio.checked);
+    });
+  });
+  periapicalPanel.addEventListener('click', e => {
+    const chip = e.target.closest('.tooth-chip');
+    if (!chip) return;
+    chip.classList.toggle('selected');
+  });
+
+  /* ---------- Cefalometría: "Otro" ---------- */
+  const chkCefOtro = document.getElementById('chkCefOtro');
+  const fCefOtro = document.getElementById('f-cefOtro');
+  chkCefOtro.addEventListener('change', () => {
+    fCefOtro.style.display = chkCefOtro.checked ? 'block' : 'none';
+    updatePackageStates();
+  });
+
+  /* ---------- Tomografía: FOV ---------- */
+  const fFovZona = document.getElementById('f-fovZona');
+  document.querySelectorAll('input[name=fov]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.fov-card').forEach(card => {
+        card.classList.toggle('checked', card.dataset.fov === radio.value && radio.checked);
+      });
+      fFovZona.style.display = radio.value === '5x5' && radio.checked ? 'block' : 'none';
+      updatePackageStates();
+    });
+  });
+
+  /* ---------- Cambios en cualquier checkbox de estudio ---------- */
+  document.querySelectorAll('.study-check').forEach(chk => {
+    chk.addEventListener('change', updatePackageStates);
+  });
+
+  /* ---------- Paquetes ---------- */
+  const packageRow = document.getElementById('packageRow');
+  packageRow.innerHTML = RADYEX.PAQUETES.map(p => `
+    <button type="button" class="package-btn" data-package="${p.id}">
+      <div class="package-btn-title">${p.label}</div>
+      <div class="package-btn-desc">${p.desc}${p.nota ? '<br>' + p.nota : ''}</div>
+    </button>
+  `).join('');
+
+  packageRow.addEventListener('click', e => {
+    const btn = e.target.closest('.package-btn');
+    if (!btn) return;
+    const paquete = RADYEX.PAQUETES.find(p => p.id === btn.dataset.package);
+    paquete.items.forEach(id => {
+      const chk = document.querySelector(`.study-check[data-study="${id}"]`);
+      if (chk && !chk.checked) { chk.checked = true; chk.dispatchEvent(new Event('change')); }
+    });
+    if (paquete.fov) {
+      const radio = document.querySelector(`input[name=fov][value="${paquete.fov}"]`);
+      if (radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+    }
+    if (paquete.nota) {
+      const indicaciones = document.getElementById('docIndicaciones');
+      if (!indicaciones.value.includes(paquete.nota)) {
+        indicaciones.value = indicaciones.value ? `${indicaciones.value}\n${paquete.nota}` : paquete.nota;
+      }
+    }
+    updatePackageStates();
+  });
+
+  function updatePackageStates(){
+    RADYEX.PAQUETES.forEach(p => {
+      const allChecked = p.items.every(id => document.querySelector(`.study-check[data-study="${id}"]`)?.checked);
+      const fovOk = !p.fov || document.querySelector(`input[name=fov][value="${p.fov}"]`)?.checked;
+      packageRow.querySelector(`[data-package="${p.id}"]`).classList.toggle('active', allChecked && fovOk);
+    });
+  }
 
   /* ---------- Envío ---------- */
   const form = document.getElementById('orderForm');
-  const studyType = document.getElementById('studyType');
-  const notes = document.getElementById('notes');
 
   function setInvalid(fieldEl, invalid){ fieldEl.classList.toggle('invalid', invalid); }
+
+  function collectSelectedStudies(){
+    const labels = [];
+    document.querySelectorAll('.study-check:checked').forEach(chk => {
+      if (chk.id === 'chkCefOtro') {
+        const texto = document.getElementById('cefOtroTexto').value.trim();
+        labels.push(texto || 'Otro');
+      } else {
+        labels.push(chk.dataset.label);
+      }
+    });
+    const fov = document.querySelector('input[name=fov]:checked');
+    if (fov) {
+      const fovData = RADYEX.TOMOGRAFIA_FOV.find(f => f.value === fov.value);
+      labels.push(`Tomografía 3D — ${fovData.label}`);
+    }
+    return labels;
+  }
+
+  function summarizeStudies(labels){
+    if (labels.length === 0) return '';
+    if (labels.length <= 2) return labels.join(' + ');
+    return `${labels[0]} + ${labels.length - 1} más`;
+  }
 
   form.addEventListener('submit', e => {
     e.preventDefault();
     let valid = true;
+
+    const docNameOk = !!document.getElementById('docName').value.trim();
+    setInvalid(document.getElementById('f-docName'), !docNameOk); valid &&= docNameOk;
+
+    const docEmailOk = !!document.getElementById('docEmail').value.trim();
+    setInvalid(document.getElementById('f-docEmail'), !docEmailOk); valid &&= docEmailOk;
+
+    const docWhatsappOk = !!document.getElementById('docWhatsapp').value.trim();
+    setInvalid(document.getElementById('f-docWhatsapp'), !docWhatsappOk); valid &&= docWhatsappOk;
+
+    const indicacionesOk = document.getElementById('docIndicaciones').value.trim().length >= 5;
+    setInvalid(document.getElementById('f-docIndicaciones'), !indicacionesOk); valid &&= indicacionesOk;
+
+    const entrega = document.querySelector('input[name=entrega]:checked');
+    document.getElementById('entregaError').style.display = entrega ? 'none' : 'flex';
+    valid &&= !!entrega;
 
     document.getElementById('patientGlobalError').style.display = 'none';
     let patientOk = true;
@@ -289,20 +505,20 @@
 
     if (usingNewPatient){
       const npName = document.getElementById('npName');
-      const npAge = document.getElementById('npAge');
-      const npPhone = document.getElementById('npPhone');
+      const npBirth = document.getElementById('npBirth');
+      const npWhatsapp = document.getElementById('npWhatsapp');
       const npNameOk = !!npName.value.trim();
-      const npAgeOk = npAge.value !== '' && Number(npAge.value) > 0;
-      const npPhoneOk = !!npPhone.value.trim();
+      const npBirthOk = !!npBirth.value;
+      const npWhatsappOk = !!npWhatsapp.value.trim();
       setInvalid(document.getElementById('f-npName'), !npNameOk);
-      setInvalid(document.getElementById('f-npAge'), !npAgeOk);
-      setInvalid(document.getElementById('f-npPhone'), !npPhoneOk);
-      patientOk = npNameOk && npAgeOk && npPhoneOk;
+      setInvalid(document.getElementById('f-npBirth'), !npBirthOk);
+      setInvalid(document.getElementById('f-npWhatsapp'), !npWhatsappOk);
+      patientOk = npNameOk && npBirthOk && npWhatsappOk;
       if (patientOk){
         newPatientData = {
           name: npName.value.trim(),
-          age: Number(npAge.value),
-          phone: npPhone.value.trim(),
+          age: RADYEX.calcAge(npBirth.value),
+          phone: npWhatsapp.value.trim(),
           email: document.getElementById('npEmail').value.trim() || 'sin correo registrado',
         };
       }
@@ -312,37 +528,64 @@
     }
     valid &&= patientOk;
 
-    const studyOk = !!studyType.value;
-    setInvalid(document.getElementById('f-studyType'), !studyOk); valid &&= studyOk;
+    let periapicalDetail = null;
+    if (chkPeriapical.checked){
+      const dientes = Array.from(periapicalPanel.querySelectorAll('.tooth-chip.selected')).map(c => c.dataset.tooth);
+      const teethOk = dientes.length > 0;
+      document.getElementById('periapicalTeethError').style.display = teethOk ? 'none' : 'flex';
+      valid &&= teethOk;
+      if (teethOk){
+        periapicalDetail = { tipo: document.querySelector('input[name=periapicalTipo]:checked').value, dientes };
+      }
+    }
 
-    const notesOk = notes.value.trim().length >= 5;
-    setInvalid(document.getElementById('f-notes'), !notesOk); valid &&= notesOk;
+    if (chkCefOtro.checked){
+      const textoOk = !!document.getElementById('cefOtroTexto').value.trim();
+      setInvalid(fCefOtro, !textoOk); valid &&= textoOk;
+    }
 
-    const dateOk = !!desiredDate.value;
-    setInvalid(document.getElementById('f-date'), !dateOk); valid &&= dateOk;
+    const fovChecked = document.querySelector('input[name=fov]:checked');
+    let tomografiaDetail = null;
+    if (fovChecked){
+      if (fovChecked.value === '5x5'){
+        const zonaOk = !!document.getElementById('fovZona').value.trim();
+        setInvalid(fFovZona, !zonaOk); valid &&= zonaOk;
+        tomografiaDetail = { fov: fovChecked.value, zona: document.getElementById('fovZona').value.trim() };
+      } else {
+        tomografiaDetail = { fov: fovChecked.value };
+      }
+    }
+
+    const studyLabels = collectSelectedStudies();
+    const studiesOk = studyLabels.length > 0;
+    document.getElementById('studiesGlobalError').style.display = studiesOk ? 'none' : 'flex';
+    valid &&= studiesOk;
 
     if (!valid) return;
 
-    const priority = document.querySelector('input[name=priority]:checked').value;
     const folio = RADYEX.generateFolio();
     const today = RADYEX.formatDateEs();
 
     let orderPayload;
+    const commonData = {
+      code: folio, date: today, status: 'pending', doctorId: RADYEX.CURRENT_DOCTOR_ID,
+      studyType: summarizeStudies(studyLabels), studies: studyLabels,
+      periapical: periapicalDetail, tomografia: tomografiaDetail,
+      entrega: entrega.value, notes: document.getElementById('docIndicaciones').value.trim(),
+      files: { [new Date().getFullYear()]: [] },
+    };
+
     if (usingNewPatient){
       orderPayload = {
-        code: folio, name: newPatientData.name, init: RADYEX.initials(newPatientData.name),
-        loc: 'Puebla', date: today, status: 'pending', doctorId: RADYEX.CURRENT_DOCTOR_ID,
-        studyType: studyType.value, priority, phone: newPatientData.phone, email: newPatientData.email,
-        age: newPatientData.age, since: `${new Date().getFullYear()} · nuevo`, notes: notes.value.trim(),
-        desiredDate: desiredDate.value, files: { [new Date().getFullYear()]: [] },
+        ...commonData, name: newPatientData.name, init: RADYEX.initials(newPatientData.name),
+        loc: 'Puebla', phone: newPatientData.phone, email: newPatientData.email,
+        age: newPatientData.age, since: `${new Date().getFullYear()} · nuevo`,
       };
     } else {
       orderPayload = {
-        code: folio, name: selectedOrder.name, init: selectedOrder.init,
-        loc: selectedOrder.loc, date: today, status: 'pending', doctorId: RADYEX.CURRENT_DOCTOR_ID,
-        studyType: studyType.value, priority, phone: selectedOrder.phone, email: selectedOrder.email,
-        age: selectedOrder.age, since: selectedOrder.since, notes: notes.value.trim(),
-        desiredDate: desiredDate.value, files: { [new Date().getFullYear()]: [] },
+        ...commonData, name: selectedOrder.name, init: selectedOrder.init,
+        loc: selectedOrder.loc, phone: selectedOrder.phone, email: selectedOrder.email,
+        age: selectedOrder.age, since: selectedOrder.since,
       };
     }
 
