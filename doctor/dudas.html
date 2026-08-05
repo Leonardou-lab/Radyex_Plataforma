@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADYEX — Dudas o sugerencias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="mobile-brand-panel"><img src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+    <div class="avatar" id="mobileAvatar">RX</div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-panel">
+        <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+      </div>
+    </div>
+    <div class="role-tag">Doctor referente</div>
+
+    <div class="nav-section-label">Menú</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;">
+      <a class="navitem" href="inicio.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a class="navitem" href="nueva-orden.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+        <span>Nueva orden</span>
+      </a>
+      <a class="navitem" href="ordenes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        <span>Mis órdenes</span>
+      </a>
+      <a class="navitem" href="pacientes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+        <span>Pacientes</span>
+      </a>
+      <a class="navitem active" href="dudas.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Dudas o sugerencias</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">PN</div>
+        <div>
+          <div class="sidebar-user-name">Dra. Patricia Núñez</div>
+          <div class="sidebar-user-role">Doctora referente</div>
+        </div>
+      </div>
+      <a class="navitem" href="../index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Salir</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Dudas o sugerencias</div>
+        <div class="page-sub">Escríbele directo al equipo de Radyex</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="avatar">PN</div>
+      </div>
+    </div>
+
+    <div class="content content-narrow">
+
+      <!-- ====== Formulario ====== -->
+      <div id="formPanel">
+        <div class="panel">
+          <div class="panel-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Cuéntanos qué necesitas
+          </div>
+          <div class="panel-sub">Ya sea una duda sobre la plataforma, un problema con una orden o una sugerencia — te responderemos a tu correo registrado.</div>
+
+          <form id="dudasForm" novalidate>
+            <div class="field" id="f-asunto">
+              <label class="field-label" for="asunto">Asunto</label>
+              <input type="text" id="asunto" placeholder="Ej. Duda sobre el tiempo de entrega de una tomografía">
+              <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa un asunto.</div>
+            </div>
+
+            <div class="field" style="margin-bottom:22px;">
+              <label class="field-label" for="mensaje">Mensaje</label>
+              <textarea id="mensaje" style="min-height:140px;" placeholder="Describe tu duda o sugerencia con el detalle que necesites..."></textarea>
+              <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Escribe tu mensaje (mínimo 10 caracteres).</div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              Enviar
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ====== Confirmación ====== -->
+      <div class="panel" id="confirmPanel" style="display:none;text-align:center;padding:40px 30px;">
+        <div class="dropzone-icon" style="background:var(--success-soft);color:var(--success);margin-bottom:18px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5 11-11"/></svg>
+        </div>
+        <div class="page-title" style="margin-bottom:6px;">Tu mensaje fue enviado</div>
+        <div class="page-sub" style="margin-bottom:24px;">Gracias por escribirnos. Te responderemos a tu correo registrado en cuanto podamos.</div>
+        <button class="btn-secondary" id="anotherMsgBtn" type="button">Enviar otro mensaje</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/common.js"></script>
+<script>
+  const form = document.getElementById('dudasForm');
+  const asunto = document.getElementById('asunto');
+  const mensaje = document.getElementById('mensaje');
+
+  function setInvalid(fieldEl, invalid){ fieldEl.classList.toggle('invalid', invalid); }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let valid = true;
+
+    const asuntoOk = !!asunto.value.trim();
+    setInvalid(document.getElementById('f-asunto'), !asuntoOk); valid &&= asuntoOk;
+
+    const mensajeOk = mensaje.value.trim().length >= 10;
+    setInvalid(mensaje.closest('.field'), !mensajeOk); valid &&= mensajeOk;
+
+    if (!valid) return;
+
+    // TODO (backend): enviar el mensaje (asunto + mensaje + datos del doctor
+    // remitente: RADYEX.getCurrentDoctor()) al correo personal de Monse. Hoy
+    // no se envía nada real — solo se valida y se muestra la confirmación.
+
+    document.getElementById('formPanel').style.display = 'none';
+    document.getElementById('confirmPanel').style.display = 'block';
+  });
+
+  document.getElementById('anotherMsgBtn').addEventListener('click', () => {
+    form.reset();
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
+    document.getElementById('confirmPanel').style.display = 'none';
+    document.getElementById('formPanel').style.display = 'block';
+    asunto.focus();
+  });
+</script>
+
+</body>
+</html>

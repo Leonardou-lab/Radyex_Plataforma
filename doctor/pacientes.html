@@ -13,10 +13,21 @@
 
 <div class="layout">
 
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="mobile-brand-panel"><img src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+    <div class="avatar" id="mobileAvatar">RX</div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo-white.svg" alt="RADYEX"></div>
+      <div class="brand-panel">
+        <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+      </div>
     </div>
     <div class="role-tag">Doctor referente</div>
 
@@ -26,6 +37,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
         <span>Inicio</span>
       </a>
+      <a class="navitem" href="nueva-orden.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+        <span>Nueva orden</span>
+      </a>
       <a class="navitem" href="ordenes.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
         <span>Mis órdenes</span>
@@ -34,6 +49,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
         <span>Pacientes</span>
         <span class="badge" id="patBadge"></span>
+      </a>
+      <a class="navitem" href="dudas.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Dudas o sugerencias</span>
       </a>
     </nav>
 

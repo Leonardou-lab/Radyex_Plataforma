@@ -12,10 +12,21 @@
 
 <div class="layout">
 
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="mobile-brand-panel"><img src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+    <div class="avatar" id="mobileAvatar">RX</div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo-white.svg" alt="RADYEX"></div>
+      <div class="brand-panel">
+        <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+      </div>
     </div>
     <div class="role-tag">Panel interno</div>
 
@@ -45,6 +56,10 @@
       <a class="navitem" href="bitacora.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
         <span>Bitácora</span>
+      </a>
+      <a class="navitem" href="reportes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span>Reportes</span>
       </a>
     </nav>
 
@@ -134,10 +149,17 @@
         </div>
       </div>
 
-      <div class="field" id="f-clinic">
-        <label class="field-label" for="inClinic">Consultorio / Clínica</label>
-        <input type="text" id="inClinic" placeholder="Ej. Consultorio Reforma, Puebla">
-        <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa el consultorio o clínica.</div>
+      <div class="field-row">
+        <div class="field" id="f-clinic">
+          <label class="field-label" for="inClinic">Consultorio / Clínica</label>
+          <input type="text" id="inClinic" placeholder="Ej. Consultorio Reforma, Puebla">
+          <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa el consultorio o clínica.</div>
+        </div>
+        <div class="field" id="f-birthdate">
+          <label class="field-label" for="inBirthDate">Fecha de nacimiento</label>
+          <input type="date" id="inBirthDate">
+          <div class="field-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Ingresa la fecha de nacimiento.</div>
+        </div>
       </div>
 
       <div class="field-row">
@@ -252,6 +274,7 @@
   const inName = document.getElementById('inName');
   const inSpecialty = document.getElementById('inSpecialty');
   const inClinic = document.getElementById('inClinic');
+  const inBirthDate = document.getElementById('inBirthDate');
   const inEmail = document.getElementById('inEmail');
   const inPhone = document.getElementById('inPhone');
   const inUsername = document.getElementById('inUsername');
@@ -295,6 +318,7 @@
     setInvalid(document.getElementById('f-name'), !inName.value.trim()); valid &&= !!inName.value.trim();
     setInvalid(document.getElementById('f-specialty'), !inSpecialty.value.trim()); valid &&= !!inSpecialty.value.trim();
     setInvalid(document.getElementById('f-clinic'), !inClinic.value.trim()); valid &&= !!inClinic.value.trim();
+    setInvalid(document.getElementById('f-birthdate'), !inBirthDate.value.trim()); valid &&= !!inBirthDate.value.trim();
     setInvalid(document.getElementById('f-email'), !emailOk); valid &&= emailOk;
     setInvalid(document.getElementById('f-phone'), !inPhone.value.trim()); valid &&= !!inPhone.value.trim();
     setInvalid(document.getElementById('f-username'), !inUsername.value.trim()); valid &&= !!inUsername.value.trim();
@@ -307,6 +331,7 @@
       name: inName.value.trim(),
       specialty: inSpecialty.value.trim(),
       clinic: inClinic.value.trim(),
+      birthDate: inBirthDate.value,
       email: inEmail.value.trim(),
       phone: inPhone.value.trim(),
       username: inUsername.value.trim(),
@@ -314,6 +339,7 @@
       lastAccess: 'Sin acceso aún',
     };
     RADYEX.addDoctor(newDoctor);
+    // TODO (backend): notificar al equipo admin cuando llegue el cumpleaños de un doctor
     closeModal();
     render();
 

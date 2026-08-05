@@ -6,8 +6,8 @@
    ============================================================ */
 
 :root{
-  --ink:#231F20;
-  --ink-soft:#3A3436;
+  --ink:#34302F;
+  --ink-soft:#4A4543;
   --brand:#6BCECF;
   --bg:#F5F7F8;
   --surface:#FFFFFF;
@@ -58,8 +58,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   flex-shrink:0;
 }
 .brand{display:flex;align-items:center;justify-content:center;padding:0 8px 28px 8px;}
+.brand-panel{background:var(--accent-soft);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;justify-content:center;}
 .brand-logo-wrap{display:flex;align-items:center;overflow:hidden;}
-.brand-logo{height:34px;width:auto;display:block;flex-shrink:0;}
+.brand-logo{height:42px;width:auto;display:block;flex-shrink:0;}
 
 .role-tag{
   text-align:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
@@ -87,6 +88,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;color:#fff;
 }
 .navitem.active .badge{background:rgba(35,31,32,.15);color:var(--ink);}
+.tag-demo{
+  font-size:10.5px;font-weight:700;color:var(--text-muted);background:var(--bg);
+  border:1px solid var(--border);border-radius:999px;padding:2px 8px;
+  text-transform:uppercase;letter-spacing:.3px;
+}
 .sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding-top:14px;}
 .sidebar-user{display:flex;align-items:center;gap:10px;padding:8px 10px 14px;}
 .sidebar-user-avatar{
@@ -553,7 +559,8 @@ input::placeholder, textarea::placeholder{color:var(--text-muted);}
   .navitem{justify-content:center;}
   .sidebar-user{justify-content:center;}
   .brand{justify-content:center;padding-bottom:24px;}
-  .brand-logo-wrap{width:30px;height:34px;}
+  .brand-panel{padding:8px;}
+  .brand-logo-wrap{width:37px;height:42px;}
   .stats{grid-template-columns:repeat(2,1fr);}
   .topbar, .content{padding-left:18px;padding-right:18px;}
   .order-meta{gap:10px;}
@@ -570,4 +577,190 @@ input::placeholder, textarea::placeholder{color:var(--text-muted);}
   .order-main{flex-basis:calc(100% - 60px);}
   .status-pill{margin-left:60px;}
   .chevron{display:none;}
+}
+
+/* ====== Etiqueta "Demostrativo" en encabezados de sección ====== */
+.demo-flag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--danger-soft);color:var(--danger);
+  border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
+}
+
+/* ====== Bitácora: lista de eventos ====== */
+.log-list{display:flex;flex-direction:column;gap:8px;}
+.log-row{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;
+}
+.log-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.log-main{flex:1;min-width:0;}
+.log-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.log-action{font-family:'Lexend',sans-serif;font-weight:600;font-size:14px;color:var(--ink);}
+.log-time{font-size:12px;color:var(--text-muted);margin-left:auto;flex-shrink:0;white-space:nowrap;}
+.log-object{font-size:13px;color:var(--text);margin-top:3px;line-height:1.4;}
+.log-detail{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
+.log-actor{font-size:12px;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.log-actor-name{font-weight:600;color:var(--text);}
+.log-role-chip{
+  font-size:10.5px;font-weight:700;color:var(--accent-dark);background:var(--accent-soft);
+  border-radius:999px;padding:1px 9px;text-transform:uppercase;letter-spacing:.3px;
+}
+
+/* ====== Reportes: barras horizontales "por tipo" ====== */
+.type-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.type-bar-row:last-child{margin-bottom:0;}
+.type-bar-label{width:170px;flex-shrink:0;font-size:13px;color:var(--text);font-weight:600;}
+.type-bar-track{flex:1;height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
+.type-bar-fill{height:100%;background:var(--accent);border-radius:999px;}
+.type-bar-count{width:30px;text-align:right;flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--ink);}
+
+/* ====== Reportes: gráfica de tendencia (barras CSS, sin librerías) ====== */
+.trend-chart{display:flex;align-items:flex-end;gap:10px;height:180px;padding:6px 2px 0;}
+.trend-bar-wrap{
+  flex:1;min-width:0;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;gap:6px;
+}
+.trend-bar-value{font-size:11px;font-weight:700;color:var(--ink);}
+.trend-bar{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--accent);min-height:3px;}
+.trend-bar-label{font-size:11px;color:var(--text-muted);text-transform:capitalize;}
+
+/* ====== Reportes: ranking de doctores referentes ====== */
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.rank-row:last-child{border-bottom:none;padding-bottom:0;}
+.rank-num{
+  width:22px;height:22px;border-radius:7px;background:var(--pending-soft);color:var(--ink-soft);
+  font-family:'Lexend',sans-serif;font-weight:700;font-size:11.5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.rank-count{margin-left:auto;font-family:'Lexend',sans-serif;font-weight:700;font-size:14px;color:var(--ink);flex-shrink:0;}
+
+/* ============================================================
+   Adaptación a móvil (≤640px): sidebar como drawer off-canvas
+   con hamburguesa, barra superior fija, todo apilado a una
+   columna, modales casi a pantalla completa, objetivos táctiles
+   ≥44px. Probado a 390px de ancho.
+   ============================================================ */
+.mobile-topbar{display:none;}
+.sidebar-overlay{display:none;}
+
+@media (max-width:640px){
+
+  /* .layout es flex en fila para el layout de escritorio (sidebar | main).
+     En columna aquí para que la barra móvil y el main se apilen a lo ancho
+     completo en vez de estirarse como columnas una junto a la otra. */
+  .layout{flex-direction:column;}
+
+  /* ---- Barra superior móvil: hamburguesa + logo + avatar ---- */
+  .mobile-topbar{
+    display:flex;align-items:center;gap:12px;width:100%;
+    background:var(--ink);padding:10px 14px;
+    position:sticky;top:0;z-index:120;flex-shrink:0;
+  }
+  .mobile-menu-btn{
+    width:44px;height:44px;border-radius:10px;border:none;flex-shrink:0;
+    background:rgba(255,255,255,.08);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mobile-menu-btn:hover{background:rgba(255,255,255,.16);}
+  .mobile-brand-panel{
+    background:var(--accent-soft);border-radius:9px;padding:5px 10px;
+    display:flex;align-items:center;
+  }
+  .mobile-brand-panel img{height:22px;width:auto;display:block;}
+  .mobile-topbar .avatar{margin-left:auto;width:38px;height:38px;flex-shrink:0;}
+
+  /* ---- Sidebar como drawer off-canvas ---- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:272px;max-width:82vw;
+    padding:22px 16px;transform:translateX(-100%);
+    transition:transform .22s ease;z-index:200;overflow-y:auto;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .nav-section-label, .sidebar-user-name, .sidebar-user-role, .role-tag{display:block;}
+  .navitem span, .navitem .badge, .sidebar-bottom span{display:inline;}
+  .navitem{justify-content:flex-start;min-height:44px;}
+  .sidebar-user{justify-content:flex-start;}
+  .brand{justify-content:center;padding-bottom:20px;}
+  .brand-panel{padding:10px 16px;}
+  .brand-logo-wrap{width:auto;height:38px;}
+  .brand-logo{height:38px;}
+
+  .sidebar-overlay{
+    display:block;position:fixed;inset:0;background:rgba(52,48,47,.55);
+    opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:150;
+  }
+  .sidebar-overlay.open{opacity:1;pointer-events:auto;}
+  body.sidebar-open{overflow:hidden;}
+
+  /* ---- Topbar y contenido de cada pantalla apilados ---- */
+  .topbar{padding:16px;flex-direction:column;align-items:flex-start;}
+  .topbar-actions{width:100%;}
+  .topbar-actions .btn-primary, .topbar-actions .btn-secondary, .topbar-actions .btn-accent{flex:1;justify-content:center;}
+  .topbar-actions .avatar{display:none;}
+  .page-title{font-size:19px;}
+  .content{padding:18px 16px 36px;}
+
+  /* ---- Tarjetas de resumen: una columna ---- */
+  .stats{grid-template-columns:1fr;}
+
+  /* ---- Toolbar de búsqueda/filtros ---- */
+  .toolbar{flex-direction:column;align-items:stretch;flex-wrap:nowrap;}
+  .search-box{flex:none;width:100%;min-width:0;max-width:none;}
+  .filters{flex:none;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;}
+
+  /* ---- Tarjetas de orden: ancho completo, pill/chevron sin romper layout ---- */
+  .order-card{flex-wrap:wrap;row-gap:8px;padding:14px 16px;}
+  .order-main{flex-basis:calc(100% - 58px);}
+  .status-pill{margin-left:58px;}
+  .chevron{display:none;}
+
+  /* ---- Tablas: scroll horizontal en vez de comprimirse ---- */
+  .table-wrap{overflow-x:auto;}
+  table.data-table{min-width:640px;}
+
+  /* ---- Modales / detalle: hoja casi a pantalla completa ---- */
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-card{
+    max-width:none;width:100%;max-height:94vh;
+    border-radius:20px 20px 0 0;padding:24px 18px 22px;
+  }
+  .modal-card.modal-sm{max-width:none;}
+  .modal-card.modal-viewer{width:100%;height:94vh;border-radius:20px 20px 0 0;}
+  .modal-close{width:44px;height:44px;top:14px;right:14px;}
+  .modal-info-grid{grid-template-columns:1fr;}
+
+  /* ---- Formularios: una columna, objetivos táctiles ≥44px ---- */
+  .field-row{grid-template-columns:1fr;}
+  input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date],
+  input[type=password], select, textarea{min-height:44px;padding:12px 14px;}
+  .btn-primary, .btn-secondary, .btn-accent, .btn-ghost, .btn-danger-ghost{min-height:44px;}
+  .radio-pill{min-height:44px;}
+  .chip{min-height:44px;}
+  .table-action, .file-action{width:44px;height:44px;}
+  .checkbox-row input[type=checkbox]{width:20px;height:20px;}
+
+  /* ---- Nueva orden: paquetes y carta dental ---- */
+  .package-row{flex-direction:column;}
+  .package-btn{min-height:44px;}
+  .study-grid, .fov-grid{grid-template-columns:1fr;}
+  /* Los ítems de grid no se encogen por debajo del contenido de sus hijos por
+     defecto (min-width:auto implícito) — sin esto, el scroll horizontal de
+     .tooth-row termina empujando el ancho de toda la página. */
+  .study-grid > *{min-width:0;}
+  .tooth-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+  .tooth-chip{min-width:32px;padding:8px 7px;flex-shrink:0;}
+
+  /* ---- Bitácora y Reportes ---- */
+  .log-row{flex-wrap:wrap;}
+  .log-time{width:100%;order:3;margin-left:0;}
+  .type-bar-row{flex-wrap:wrap;row-gap:4px;}
+  .type-bar-label{width:100%;}
+  .type-bar-count{width:auto;margin-left:auto;}
+  .trend-chart{height:150px;}
+  .trend-bar-wrap{gap:4px;}
 }

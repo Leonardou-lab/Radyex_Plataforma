@@ -12,10 +12,21 @@
 
 <div class="layout">
 
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="mobile-brand-panel"><img src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+    <div class="avatar" id="mobileAvatar">RX</div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo-white.svg" alt="RADYEX"></div>
+      <div class="brand-panel">
+        <div class="brand-logo-wrap"><img class="brand-logo" src="../assets/logo/radyex-logo.svg" alt="RADYEX"></div>
+      </div>
     </div>
     <div class="role-tag">Panel interno</div>
 
@@ -45,6 +56,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
         <span>Bitácora</span>
       </a>
+      <a class="navitem" href="reportes.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span>Reportes</span>
+      </a>
     </nav>
 
     <div class="sidebar-bottom">
@@ -68,24 +83,158 @@
     <div class="topbar">
       <div>
         <div class="page-title">Bitácora</div>
-        <div class="page-sub">Historial de actividad del centro</div>
+        <div class="page-sub">Registro de auditoría: quién accedió a qué expediente y cuándo</div>
       </div>
       <div class="topbar-actions">
+        <span class="demo-flag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg> Demostrativo</span>
         <div class="avatar">RX</div>
       </div>
     </div>
 
-    <div class="content content-narrow">
-      <div class="placeholder-block">
-        <div class="placeholder-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+    <div class="content">
+
+      <div class="panel" style="margin-bottom:20px;display:flex;gap:14px;align-items:flex-start;">
+        <div class="stat-icon" style="background:var(--danger-soft);color:var(--danger);flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+        <div>
+          <div class="panel-title" style="margin-bottom:4px;">Requisito legal (LFPDPPP)</div>
+          <div class="panel-sub" style="margin-bottom:0;">Este registro es de solo lectura: no se puede editar ni eliminar ningún evento. Incluye quién visualizó o descargó el archivo de un paciente, no solo quién lo subió — es el corazón del requisito de auditoría. Vista demostrativa con datos ficticios; el registro real se explica más abajo.</div>
         </div>
-        <div class="page-title" style="margin-bottom:8px;">Próximamente</div>
-        <div class="page-sub" style="max-width:420px;margin:0 auto;">Aquí se mostrará el registro de altas de doctores, archivos subidos y cambios de estatus de cada orden.</div>
       </div>
+
+      <div class="stats" id="statsGrid"></div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-title">Filtros</div>
+        <div class="panel-sub">Combina acción, usuario y rango de fechas.</div>
+
+        <div class="filters" id="actionFilters" style="margin-bottom:16px;"></div>
+
+        <div class="field-row">
+          <div class="field" style="margin-bottom:0;">
+            <label class="field-label" for="userFilter">Usuario</label>
+            <select id="userFilter">
+              <option value="">Todos los usuarios</option>
+            </select>
+          </div>
+          <div class="field-row" style="margin-bottom:0;">
+            <div class="field" style="margin-bottom:0;">
+              <label class="field-label" for="fromFilter">Desde</label>
+              <input type="date" id="fromFilter">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label class="field-label" for="toFilter">Hasta</label>
+              <input type="date" id="toFilter">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p id="resultCount" style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px;"></p>
+      <div class="log-list" id="logList"></div>
+
     </div>
   </main>
 </div>
+
+<script src="../assets/js/common.js"></script>
+<script>
+  const bitacora = RADYEX.getBitacora();
+  const actions = RADYEX.LOG_ACTIONS;
+
+  /* ---- Tarjetas de resumen ---- */
+  const coreCount = bitacora.filter(e => e.type === 'visualizacion' || e.type === 'descarga').length;
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon" style="background:var(--pending-soft);color:var(--ink-soft);">${RADYEX.ICONS.log}</div>
+      <div><div class="stat-num">${bitacora.length}</div><div class="stat-label">Eventos registrados</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${actions.visualizacion.bg};color:${actions.visualizacion.fg};">${RADYEX.ICONS.eye}</div>
+      <div><div class="stat-num">${bitacora.filter(e => e.type === 'visualizacion').length}</div><div class="stat-label">Visualizaciones de archivo</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${actions.descarga.bg};color:${actions.descarga.fg};">${RADYEX.ICONS.download}</div>
+      <div><div class="stat-num">${bitacora.filter(e => e.type === 'descarga').length}</div><div class="stat-label">Descargas de archivo</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${actions.doctor.bg};color:${actions.doctor.fg};">${RADYEX.ICONS.userPlus}</div>
+      <div><div class="stat-num">${bitacora.filter(e => e.type === 'doctor').length}</div><div class="stat-label">Altas / ediciones de doctor</div></div>
+    </div>
+  `;
+
+  /* ---- Filtros ---- */
+  const actionFilters = document.getElementById('actionFilters');
+  actionFilters.innerHTML = `<button class="chip active" data-action="">Todas</button>` +
+    Object.entries(actions).map(([key, a]) => `<button class="chip" data-action="${key}">${a.chip}</button>`).join('');
+
+  const userSelect = document.getElementById('userFilter');
+  const uniqueUsers = [...new Set(bitacora.map(e => e.actor))].sort();
+  userSelect.innerHTML += uniqueUsers.map(u => `<option value="${u}">${u}</option>`).join('');
+
+  const fromFilter = document.getElementById('fromFilter');
+  const toFilter = document.getElementById('toFilter');
+
+  let activeAction = '';
+
+  function render() {
+    const user = userSelect.value;
+    const from = fromFilter.value;
+    const to = toFilter.value;
+
+    const rows = bitacora.filter(e => {
+      if (activeAction && e.type !== activeAction) return false;
+      if (user && e.actor !== user) return false;
+      const day = e.ts.slice(0, 10);
+      if (from && day < from) return false;
+      if (to && day > to) return false;
+      return true;
+    });
+
+    document.getElementById('resultCount').textContent =
+      `Mostrando ${rows.length} de ${bitacora.length} eventos.`;
+
+    const list = document.getElementById('logList');
+    if (rows.length === 0) {
+      list.innerHTML = `<div class="empty-state">No hay eventos con esos filtros.</div>`;
+      return;
+    }
+
+    list.innerHTML = rows.map(e => {
+      const a = actions[e.type];
+      const dt = RADYEX.formatDateTimeEs(e.ts);
+      return `
+        <div class="log-row">
+          <div class="log-icon" style="background:${a.bg};color:${a.fg};">${RADYEX.ICONS[a.icon]}</div>
+          <div class="log-main">
+            <div class="log-top">
+              <span class="log-action">${a.label}</span>
+              <span class="log-time">${dt.date} · ${dt.time}</span>
+            </div>
+            <div class="log-object">${e.object}</div>
+            ${e.detail ? `<div class="log-detail">${e.detail}</div>` : ''}
+            <div class="log-actor">
+              <span class="log-actor-name">${e.actor}</span>
+              <span class="log-role-chip">${e.role}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  actionFilters.addEventListener('click', e => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    actionFilters.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    activeAction = btn.dataset.action;
+    render();
+  });
+  userSelect.addEventListener('change', render);
+  fromFilter.addEventListener('change', render);
+  toFilter.addEventListener('change', render);
+
+  render();
+</script>
 
 </body>
 </html>
