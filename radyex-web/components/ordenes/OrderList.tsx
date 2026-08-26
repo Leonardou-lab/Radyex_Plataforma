@@ -1,0 +1,169 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Search, Plus, ClipboardList, Clock, Check } from "lucide-react";
+import type { Orden, EstatusOrden } from "@/lib/data";
+import { OrderCard } from "./OrderCard";
+import { PatientModal } from "./PatientModal";
+
+type OrderListProps = {
+  /** Órdenes del doctor en sesión (ya filtradas por doctor en la página). */
+  orders: Orden[];
+  /** Iniciales del doctor en sesión, para el avatar del topbar. */
+  doctorIniciales: string;
+};
+
+// Filtros de estatus del toolbar. "todos" no es un EstatusOrden real,
+// por eso el tipo es la unión explícita en vez de solo EstatusOrden.
+type Filtro = "todos" | EstatusOrden;
+
+const FILTROS: { key: Filtro; label: string; color?: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "pending", label: "Pendiente", color: "var(--pending)" },
+  { key: "warn", label: "En proceso", color: "var(--warn)" },
+  { key: "success", label: "Finalizado", color: "var(--success)" },
+];
+
+/**
+ * PLANTILLA de migración (ver docs/migracion-nextjs.md): esta es la
+ * pantalla de referencia de la fase 1. Componente "de pantalla"
+ * (client component, por eso "use client" arriba): junta los datos
+ * (recibidos por props desde app/(doctor)/ordenes/page.tsx) con el
+ * estado de la interfaz.
+ *
+ * Tres estados con useState, cada uno con una responsabilidad:
+ * - `busqueda`: texto de la caja de búsqueda.
+ * - `filtroActivo`: chip de estatus seleccionado.
+ * - `ordenAbierta`: qué orden se muestra en el modal (null = cerrado).
+ *
+ * React vuelve a ejecutar este componente cada vez que alguno de
+ * estos estados cambia, así que `ordenesFiltradas` de abajo se
+ * recalcula solo con cada tecleo o click en un chip — no hace falta
+ * un event listener manual como en el mockup (`input.addEventListener`).
+ */
+export function OrderList({ orders, doctorIniciales }: OrderListProps) {
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroActivo, setFiltroActivo] = useState<Filtro>("todos");
+  const [ordenAbierta, setOrdenAbierta] = useState<Orden | null>(null);
+
+  // Los números de las tarjetas de resumen (stats) son siempre del
+  // total de órdenes del doctor, sin importar el filtro/búsqueda
+  // activos — igual que en el mockup.
+  const totalEnProceso = orders.filter((o) => o.status === "warn").length;
+  const totalFinalizadas = orders.filter((o) => o.status === "success").length;
+  const totalPendientes = orders.filter((o) => o.status === "pending").length;
+
+  const ordenesFiltradas = orders
+    .filter((o) => filtroActivo === "todos" || o.status === filtroActivo)
+    .filter((o) => {
+      const q = busqueda.trim().toLowerCase();
+      return o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q);
+    });
+
+  return (
+    <>
+      <div className="topbar">
+        <div>
+          <div className="page-title">Mis órdenes</div>
+          <div className="page-sub">Consulta y da seguimiento a los estudios de tus pacientes</div>
+        </div>
+        <div className="topbar-actions">
+          <Link className="btn-primary" href="/nueva-orden">
+            <Plus size={16} strokeWidth={2.2} />
+            Nueva orden
+          </Link>
+          <div className="avatar">{doctorIniciales}</div>
+        </div>
+      </div>
+
+      <div className="content">
+        <div className="stats">
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: "var(--pending-soft)", color: "var(--pending)" }}>
+              <ClipboardList size={20} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="stat-num">{orders.length}</div>
+              <div className="stat-label">Órdenes totales</div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: "var(--warn-soft)", color: "var(--warn)" }}>
+              <Clock size={20} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="stat-num">{totalEnProceso}</div>
+              <div className="stat-label">En proceso</div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: "var(--success-soft)", color: "var(--success)" }}>
+              <Check size={20} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="stat-num">{totalFinalizadas}</div>
+              <div className="stat-label">Finalizadas</div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: "var(--pending-soft)", color: "var(--ink-soft)" }}>
+              <Clock size={20} strokeWidth={2} />
+            </div>
+            <div>
+              <div className="stat-num">{totalPendientes}</div>
+              <div className="stat-label">Pendientes</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="toolbar">
+          <div className="search-box">
+            <Search size={16} strokeWidth={2} />
+            <input
+              type="text"
+              placeholder="Buscar paciente o folio..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+          <div className="filters">
+            {/* Un chip por filtro, generado con .map() — así agregar un
+                estatus nuevo el día de mañana es agregar una fila al
+                arreglo FILTROS, no copiar/pegar un <button>. */}
+            {FILTROS.map((filtro) => (
+              <button
+                key={filtro.key}
+                className={`chip${filtroActivo === filtro.key ? " active" : ""}`}
+                onClick={() => setFiltroActivo(filtro.key)}
+              >
+                {filtro.color && <span className="dot" style={{ background: filtro.color }} />}
+                {filtro.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="order-list">
+          {ordenesFiltradas.length === 0 ? (
+            <div className="empty-state">No encontramos órdenes con esos criterios.</div>
+          ) : (
+            // `order.code` es el folio: único por orden, por eso sirve
+            // de key. React lo usa para saber qué tarjeta es cuál entre
+            // un render y el siguiente (por ejemplo, al filtrar).
+            ordenesFiltradas.map((order) => (
+              <OrderCard key={order.code} order={order} onOpen={setOrdenAbierta} />
+            ))
+          )}
+        </div>
+        <p className="mt-3.5 text-[12.5px] text-[var(--text-muted)]">
+          Toca cualquier paciente para ver su información completa y sus archivos.
+        </p>
+      </div>
+
+      {ordenAbierta && (
+        <PatientModal order={ordenAbierta} onClose={() => setOrdenAbierta(null)} />
+      )}
+    </>
+  );
+}

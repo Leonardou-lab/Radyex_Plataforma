@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./radyex-ui.css";
+
+/* ============================================================
+   RADYEX — tokens de marca
+   Paleta navy/teal portada 1:1 de assets/css/styles.css (el
+   mockup estático). Nunca hardcodear colores fuera de estas
+   variables — ver CLAUDE.md y .claude/rules/estilos.md. Se
+   exponen también como utilidades de Tailwind (bg-ink, text-brand,
+   border-pending-soft, etc.) vía el bloque @theme de abajo.
+   ============================================================ */
+:root {
+  /* -- Marca RADYEX -- */
+  --ink: #34302f;
+  --ink-soft: #4a4543;
+  --brand: #6bcecf;
+  --bg: #f5f7f8;
+  --surface: #ffffff;
+  --accent: #1e8688;
+  --accent-soft: #ecf8f8;
+  --accent-dark: #146a6c;
+  --warn: #c2750c;
+  --warn-soft: #fbf0df;
+  --success: #1f8a4c;
+  --success-soft: #e7f6ed;
+  --pending: #5b6b85;
+  --pending-soft: #ebeef3;
+  --danger: #c23b3b;
+  --danger-soft: #fbe9e9;
+  --text: #22201f;
+  --text-muted: #6b6b6b;
+
+  /* -- Slots de shadcn/ui mapeados a la marca (para que los
+     componentes de shadcn que se usen en fases siguientes
+     respeten la paleta en vez del gris genérico por default) -- */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--accent-soft);
+  --secondary-foreground: var(--accent-dark);
+  --muted: #eceef0;
+  --muted-foreground: var(--text-muted);
+  --accent-foreground: #ffffff;
+  --destructive: var(--danger);
+  --border: #e6eaec;
+  --input: #e6eaec;
+  --ring: var(--accent);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Tokens de marca expuestos como utilidades directas
+     (bg-ink, text-brand, border-pending-soft...), igual que las
+     variables CSS del mockup. */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-brand: var(--brand);
+  --color-surface: var(--surface);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-dark: var(--accent-dark);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-pending: var(--pending);
+  --color-pending-soft: var(--pending-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-text-muted: var(--text-muted);
+
+  /* Lexend (display, títulos) + Inter (UI, texto general).
+     Genera las utilidades font-sans y font-display. */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-lexend);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
