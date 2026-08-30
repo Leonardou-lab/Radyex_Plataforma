@@ -1,5 +1,5 @@
 # Estado del proyecto
-Última actualización: 2026-08-04
+Última actualización: 2026-08-28
 
 ## Hecho
 - Prototipo estático navegable (HTML/CSS/JS plano, sin framework aún) con `index.html` selector de rol.
@@ -47,17 +47,285 @@
   - **Incidente propio durante esta tarea, ya resuelto**: al limpiar después de un script de edición fallido, se corrió `git checkout --` sobre los 4 archivos de `doctor/*.html` sin revisar antes que eso revertiría cambios sin commitear de la tarea de adaptación móvil (drawer, panel del logo) hecha antes en esta misma sesión. Se detectó de inmediato (`grep` de `mobile-topbar` en cero) y se reconstruyó el marcado exacto reaplicando el mismo script de transformación ya usado en el resto del sitio, antes de continuar. Ninguna otra parte de esos 4 archivos se vio afectada (verificado por HTML parseable + contenido de formularios/scripts intacto). Lección: revisar `git status`/diff antes de cualquier `git checkout --` sobre archivos con cambios sin commitear, incluso "solo para limpiar".
   - Verificado en navegador: menú del doctor con los 5 ítems y estados activos correctos en cada pantalla, formulario de dudas con validación y confirmación funcionando, campo Entrega visible y operante en nueva orden, sin overflow horizontal en las 13 pantallas del sitio a 390px, y el drawer móvil confirmado visualmente (por captura de pantalla) abriendo correctamente en `doctor/dudas.html`.
 
+- **Migración a Next.js — Fase 1 completa (fundaciones + pantalla de referencia), 2026-08-18.** Alcance y patrón en `docs/migracion-nextjs.md`. Se hizo:
+  - Proyecto `radyex-web/` creado con `create-next-app` (App Router, TypeScript, Tailwind v4, ESLint, alias `@/*`) y `shadcn/ui` inicializado (`components.json`, estilo `base-nova`), sin mezclarse con el mockup estático (`assets/`, `radyex/`, `doctor/` siguen intactos como referencia, sin tocarse).
+  - Tokens de marca portados a `app/globals.css`: variables CSS 1:1 del mockup (`--ink`, `--brand`, `--accent`, warn/success/pending, etc.) expuestas como utilidades de Tailwind vía `@theme` (Next 16 + Tailwind v4 usan CSS en vez de `tailwind.config.js`) y mapeadas a los slots semánticos de shadcn. Lexend + Inter cargadas con `next/font` (`--font-display` / `--font-sans`). Logos SVG y los PDFs de ejemplo copiados a `public/`.
+  - `lib/data.ts`: módulo de datos tipado (semilla) — `SEED_DOCTORS`, `SEED_ORDERS`, `STUDY_CATEGORIES`, `TOMOGRAFIA_FOV`, `DIENTES_FDI`, `PAQUETES`, `calcAge`, `daysUntilBirthday`, `initials` — portado de `assets/js/common.js`, sin sessionStorage ni backend (las pantallas leen los arreglos directo).
+  - `components/layout/`: `Sidebar` (un componente, ítems por rol en `nav-items.ts`), `MobileTopbar`, `SidebarShell` (estado del drawer móvil con `useState`). Route groups `app/(doctor)/` (URLs limpias: `/ordenes`, etc.) y `app/(radyex)/` (bajo `/admin/*`, para no chocar con nombres de pantalla repetidos entre las dos vistas — decisión documentada en `CLAUDE.md`). `(radyex)` solo tiene un placeholder en `/admin` por ahora.
+  - `app/radyex-ui.css`: clases del sistema de diseño portadas del mockup (sidebar, botones, tarjetas de orden, chips, modal, drawer móvil), mismos nombres de clase que `assets/css/styles.css` — se extiende pantalla por pantalla en la fase 4.
+  - **Pantalla de referencia "Mis órdenes" (vista Doctor)** migrada end-to-end en `components/ordenes/`: `OrderList` (búsqueda + filtros + estado del modal, todo con `useState`), `OrderCard`, `StatusPill`, `PatientModal` (pestañas por año), `FileViewerModal` (visor de PDF), `InfoItem`. Comentada en español explicando props/estado/`.map`+`key`, como plantilla para el resto de pantallas.
+  - Íconos con `lucide-react` (componentes reales de Lucide, no SVG a mano).
+  - Verificado en navegador (`npm run dev` y `npm run build`, ambos sin errores/warnings; `tsc --noEmit` y `eslint` limpios): portada con selector de rol, "Mis órdenes" con búsqueda/filtros/modal/visor funcionando, y sin overflow horizontal a 390px (confirmado con `scrollWidth === clientWidth`), incluido el drawer móvil y el modal como hoja de pantalla completa.
+  - Bug encontrado y corregido en el camino: `initials()` sobre "Dra. Patricia Núñez" daba "DP" (tomaba el honorífico como palabra) en vez de "PN" como en el mockup — se filtran honoríficos (`Dr.`/`Dra.`) antes de calcular iniciales.
+  - `CLAUDE.md` (raíz) actualizado con la estructura de `radyex-web/` (rutas, dónde vive cada cosa, convención de URLs por rol).
+
+- **Badge "Entrega física" en el formulario de nueva orden (2026-08-19)**, solución validada con Monse sobre `docs/orden-de-estudio.md`. Aplicado en `doctor/nueva-orden.html` (la versión vigente del formulario — todavía no migrada a `radyex-web/`, ver fase 4 abajo):
+  - No se quitó ningún estudio del formulario. Los que no se digitalizan (el paciente los recoge en físico, **siempre**, sin importar si la orden dice Impreso o Digital) llevan un badge sutil "Entrega física" (tokens `--pending`/`--pending-soft`, ícono Lucide `package`, tooltip vía `title`) — es informativo, no un error.
+  - Dirigido por datos: cada ítem de `RADYEX.STUDY_CATEGORIES` en `assets/js/common.js` puede traer `entregaFisica: true` (siempre física: Oclusal, Superior, Inferior, Aleta de mordida, Papel fotográfico, Estudio y Trabajo de modelos) o `entregaFisica: "si-rx"` (caso especial de Periapical: física solo si el doctor elige RX, con Sensor es digital — el badge se conecta al mismo listener que ya alternaba los pills Sensor/RX). `nueva-orden.html` solo lee esos flags para pintar el badge, nada hardcodeado por pantalla.
+  - Los paquetes (`RADYEX.PAQUETES`) muestran una nota "Incluye entrega física: …" derivada automáticamente de sus `items` (para que no se desactualice si cambia el catálogo); Implantología además declara `entregaFisicaExtra: ["Guía quirúrgica"]` porque la guía quirúrgica no es un estudio marcable con checkbox propio, solo una nota de texto — no se puede derivar de `items`.
+  - Mismos flags portados a `radyex-web/lib/data.ts` (`EstudioCatalogo.entregaFisica`, `Paquete.entregaFisicaExtra`) para que la regla no se pierda cuando se migre esta pantalla en la fase 4, aunque hoy ese módulo todavía no tiene una pantalla de "nueva orden" que lo use.
+  - Regla de dominio documentada en `docs/orden-de-estudio.md` (nueva sección "Entrega física").
+  - Verificado en navegador: los 7 estudios/badges esperados se muestran (y ninguno de más), el badge de Periapical aparece/desaparece correctamente al alternar Sensor/RX, tooltip correcto, sin errores de consola y sin overflow horizontal a 390px.
+
+- **Fix: los botones de paquete (Ortodoncia/Diagnóstico/Implantología) no se podían desseleccionar (2026-08-19)**, reportado por el usuario en `doctor/nueva-orden.html`. El listener de click solo marcaba checkboxes (`if (!chk.checked) chk.checked = true`), nunca los desmarcaba, así que un segundo click sobre un paquete ya activo no hacía nada. Ahora el click alterna según `btn.classList.contains('active')`: si ya estaba activo, desmarca sus estudios, desmarca el FOV que hubiera marcado, y quita la línea de `nota` que hubiera agregado a Indicaciones (si no estaba activo, hace lo de siempre: marcar todo). Verificado en navegador: seleccionar → desseleccionar Ortodoncia e Implantología limpia checkboxes, FOV e Indicaciones correctamente, sin errores de consola.
+
+- **Mockup aprobado por Monse + respuestas sobre perfiles y accesos (2026-08-24).**
+  Monse aprobó el mockup completo (front end estático + fase 1 de Next.js) y respondió
+  las preguntas pendientes de perfiles/accesos que bloqueaban el diseño de auth/RLS.
+  Documentado en el nuevo `docs/perfiles-y-acceso.md` (fuente de verdad) y reflejado
+  en `docs/roadmapp.md` (compuertas resueltas, fases 2/3/6 actualizadas, nueva sección
+  de mejoras futuras) y `docs/bitacora-y-reportes.md` (visibilidad solo-admin
+  confirmada, campo de "quién subió" en el evento de subida de archivo). Sin cambios
+  de código en esta ronda — es documentación/planeación.
+
+  **Decisiones cerradas:**
+  - 3 roles: Administrador (Monse, ve todo incluida bitácora completa), Equipo Radyex
+    (2 usuarios, sin bitácora legal completa, cada subida de archivo registra qué
+    persona del equipo la hizo), Doctor (sin cambios respecto al mockup).
+  - Alta de doctor: registro no abierto, doble filtro liga + aprobación del
+    Administrador (el equipo no aprueba altas).
+  - Cambios a perfiles de doctor/paciente por sensibilidad de campo: menores
+    (teléfono, correo, dirección) el equipo los aplica directo; sensibles (nombres,
+    estudios, órdenes) requieren aprobación de Monse vía mecánica de "solicitud
+    pendiente + aviso a Monse" — la misma mecánica se reutiliza para aprobar altas de
+    doctor, se construye una sola vez.
+  - Bitácora legal completa: visibilidad solo-Administrador, el equipo Radyex no la ve.
+  - Baja de doctor: se desactiva, nunca se borra; expedientes de pacientes se
+    conservan por NOM-004 (5 años).
+
+  **Preguntas abiertas (bloquean partes puntuales del diseño, no todo el backend):**
+  - Pacientes compartidos entre doctores: falta confirmar si "solo el que pide el
+    doctor" significa que cada doctor solo ve sus propias órdenes sobre un paciente
+    (sin compartir expediente), y cómo se reconoce internamente al mismo paciente que
+    regresa con otro doctor. Bloquea el diseño final de las tablas de paciente y RLS
+    (fase 2/3).
+  - Alcance del respaldo .rar al desactivar un doctor (qué incluye, a qué correo se
+    envía). No bloquea fases 2-5, solo el detalle de la fase 6.
+
+  **Features nuevas agendadas como mejoras futuras** (no en el núcleo, después del
+  backend base): semáforo de actividad del doctor por fecha de último estudio
+  (rojo/naranja/verde), y el respaldo .rar + envío por correo al desactivar un doctor.
+
+- **Pacientes compartidos entre doctores — decisión cerrada (2026-08-24).** La
+  pregunta abierta de la entrada anterior quedó resuelta y documentada en
+  `docs/perfiles-y-acceso.md`: un paciente es una sola fila (expediente maestro,
+  dueño Radyex), lo que pertenece a cada doctor son las órdenes (`doctor_id` en la
+  orden, no en el paciente). El doctor ve solo sus propias órdenes/estudios sobre un
+  paciente; Radyex ve el expediente completo y deriva la lista de doctores que lo
+  refieren de los `doctor_id` distintos en sus órdenes. El paciente que regresa lo
+  vincula/crea el equipo de Radyex al procesar la orden (detalle de flujo interno,
+  no bloquea el esquema). Sin este documento ya no queda ninguna pregunta abierta
+  bloqueando el diseño de las tablas de paciente/orden ni las políticas de RLS de
+  doctor — solo sigue pendiente el alcance del respaldo .rar (fase 6, no bloquea
+  fase 2).
+
+- **Esquema SQL propuesto para Supabase (2026-08-24 a 2026-08-26), PROPUESTA sin
+  aplicar.** Dos migraciones nuevas en `radyex-web/supabase/migrations/`, ninguna
+  corrida contra un proyecto real (no hay `supabase/config.toml` todavía — falta
+  `supabase init`, y no se ha corrido `supabase db push`):
+  - `20260824120000_esquema_inicial.sql`: tablas de `usuarios`/`doctores`/`pacientes`/
+    `ordenes`/`orden_estudios`/`archivos`/`bitacora`/`solicitudes_pendientes` +
+    catálogo de estudios, coherente con `docs/perfiles-y-acceso.md`,
+    `docs/orden-de-estudio.md` y `docs/bitacora-y-reportes.md`. Incluye políticas de
+    RLS por rol, funciones auxiliares (`es_admin()`, `es_equipo()`, etc.), la mecánica
+    de `solicitudes_pendientes` con una función `aprobar_solicitud()` de referencia, y
+    triggers que escriben en la bitácora los 4 eventos que sí son escrituras de base
+    de datos (alta/edición de doctor, subida de archivo, cambio de estatus).
+  - `20260824120100_catalogo_estudios_seed.sql`: semilla del catálogo de
+    estudios/FOV/paquetes, transcrita de `docs/orden-de-estudio.md`/`lib/data.ts`.
+  - **Correcciones aplicadas sobre el esquema inicial** (mismo archivo, sin migración
+    nueva encima, porque nada se había aplicado todavía):
+    1. `ultimo_acceso` de un doctor era inescribible con las políticas de RLS
+       originales (un doctor no puede editar su propia fila) — se agregó la función
+       `registrar_acceso()` (`SECURITY DEFINER`) como única vía de escritura, para que
+       la app la invoque tras el login (fase 3+).
+    2. El trigger `trg_bitacora_edicion_doctor` disparaba en cualquier `UPDATE` de
+       `doctores`, así que cada login (que ahora toca `ultimo_acceso`) hubiera metido
+       un evento falso de "edición de doctor" en la bitácora legal — se restringió a
+       columnas de negocio (`especialidad, consultorio, telefono, nombre_usuario,
+       estatus, fecha_nacimiento`), excluyendo `ultimo_acceso`.
+    3. La política de `INSERT` en `bitacora` solo validaba `usuario_id = auth.uid()`,
+       lo que permitía que un doctor insertara desde el navegador eventos falsos de
+       cualquier tipo (p. ej. `alta_doctor`). Se restringió a que un cliente solo
+       pueda auto-registrar eventos de **lectura** (`visualizacion_archivo`,
+       `descarga_archivo`, y `consulta_bitacora` solo si es admin) — los eventos de
+       escritura ya los meten los triggers `SECURITY DEFINER`, que no pasan por esta
+       política.
+    4. `validar_orden_estudio()` hardcodeaba `fov = '5x5'` para exigir "Zona" — se
+       hizo data-driven, consultando el flag `catalogo_fov.requiere_zona`.
+  - **Revisión de seguridad (2026-08-26), sin cambios de código** — confirmó que las
+    4 correcciones anteriores quedaron aplicadas correctamente, y detectó que
+    `ultimo_acceso` **no existe en `pacientes`** (solo en `doctores`) — si se necesita
+    rastrear el último acceso de un paciente, esa columna/función/política falta por
+    completo. Ver "Pendiente" abajo.
+  - **Corrección al contenido de `paquete_estudios` (2026-08-26)**, confirmada por
+    Monse: cada paquete debe pre-marcar su contenido **completo** (el doctor
+    desmarca/cambia después), no un subconjunto. Se agregó "Trabajo" (modelos) a
+    Ortodoncia y Diagnóstico, y "Estudio" + "Trabajo" (modelos) a Implantología, que
+    antes no marcaba ningún modelo pese a que el papel siempre los incluyó. Detalle en
+    `docs/orden-de-estudio.md` § "Contenido exacto pre-marcado por paquete". El mockup
+    (`assets/js/common.js`) y `radyex-web/lib/data.ts` (`PAQUETES`) **no se tocaron**
+    y quedaron desalineados con esta regla — ver "Pendiente".
+
+- **Fix: al elegir el paquete Ortodoncia también se encendía el botón de Diagnóstico
+  (2026-08-26)**, reportado por el usuario en `doctor/nueva-orden.html`. Causa: el
+  estado "activo" de un botón de paquete se infería comparando checkboxes (¿están
+  todos los suyos marcados?), y los estudios de Diagnóstico son un subconjunto exacto
+  de los de Ortodoncia (Panorámica, Foto digital, Modelo estudio) — al marcar
+  Ortodoncia, Diagnóstico quedaba "cumplido" sin que lo hubieran clickeado. Se
+  reemplazó esa inferencia por un `Set` (`paquetesActivos`) que registra qué paquetes
+  clickeó el doctor: un botón solo se prende por click explícito; `updatePackageStates()`
+  ahora solo puede **apagarlo** (si el doctor destilda uno de sus estudios a mano, o si
+  otro paquete que compartía un estudio se desactiva y se lo lleva), nunca prenderlo
+  por inferencia. Cada paquete sigue siendo personalizable de forma independiente.
+  Verificado en el navegador (servidor local temporal): click en Ortodoncia ya no
+  enciende Diagnóstico; activar ambos por separado y luego apagar Ortodoncia apaga
+  también Diagnóstico solo si pierde alguno de sus propios estudios compartidos, no si
+  sus estudios exclusivos siguen completos; sin errores de consola. Cambio acotado a
+  `doctor/nueva-orden.html` — `radyex-web/lib/data.ts` todavía no tiene pantalla de
+  "nueva orden" (fase 4 pendiente), así que no aplicaba ahí.
+
+- **Fase 3 — conexión front↔Supabase confirmada + refresco de sesión
+  (2026-08-27).** Los dos clientes de `radyex-web/lib/` (`client.ts` para
+  Client Components con `createBrowserClient`, `server.ts` para Server
+  Components/Actions con `createServerClient` y `getAll`/`setAll` sobre
+  `next/headers`) quedaron probados y funcionando, leyendo
+  `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` de `.env.local`.
+  Se agregó `radyex-web/proxy.ts` (en la raíz del proyecto, junto a
+  `package.json`) que refresca la sesión de Supabase en cada petición:
+  reconstruye el cliente de servidor con cookies de request/response,
+  reescribe las cookies renovadas tanto en `request` como en el `response`
+  que finalmente se devuelve (para no perderlas), y llama
+  `supabase.auth.getUser()` sin nada intercalado en medio (rompe la sesión si
+  se mete código entre la creación del cliente y esa llamada). Excluye del
+  `matcher` los assets de Next, el favicon y las imágenes estáticas.
+  **Nota de nomenclatura:** el proyecto corre Next.js 16.3.1, que renombró la
+  convención `middleware.ts`/`middleware()` a `proxy.ts`/`proxy()`
+  (`middleware.ts` sigue funcionando pero está deprecado) — por eso el
+  archivo se llama `proxy.ts` y no `middleware.ts`, con el mismo patrón
+  oficial de Supabase por dentro.
+
+- **Fase 3 — pantalla de login (2026-08-27).** `radyex-web/app/login/page.tsx`
+  (Server Component, Card/Input/Label/Button de shadcn + iconos Lucide, lee
+  `searchParams.error` y lo muestra arriba del formulario) y
+  `radyex-web/app/login/actions.ts` con dos Server Actions: `login`
+  (`signInWithPassword`; error → `redirect('/login?error=...')` con mensaje
+  genérico, sin distinguir motivo por seguridad) y `logout` (`signOut()` +
+  `redirect('/login')`). El botón "Salir" placeholder que ya existía al fondo
+  del Sidebar (`components/layout/Sidebar.tsx`) se conectó a la Server Action
+  `logout` real (antes era un `<Link href="/">` de relleno). Probado en
+  navegador de punta a punta: credenciales falsas → error visible; entrar y
+  salir con el usuario de prueba, funcionando.
+
+- **Fase 3 — protección de rutas por rol (2026-08-28).** Cierra el corazón de
+  la Fase 3 (login + RLS + rutas por rol):
+  - `radyex-web/lib/auth.ts` (nuevo): helper de servidor
+    `obtenerUsuarioConRol()` — llama `supabase.auth.getUser()` y, si hay
+    sesión, lee `rol` de `public.usuarios` por `id` (permitido por la policy
+    "cada quien ve su propia fila de usuario"). Si la fila no existe o la
+    consulta falla, devuelve `rol: null` en vez de lanzar — nunca tumba el
+    layout que lo llama. También expone `rutaInicioPorRol()` (doctor →
+    `/ordenes`, admin/equipo_radyex → `/admin`, sin rol → `/login`).
+  - `app/(doctor)/layout.tsx` y `app/(radyex)/layout.tsx`: guardia de acceso
+    en el servidor. Sin sesión → `/login`; sesión sin fila/rol en
+    `usuarios` (cuenta "huérfana") → `/cuenta-no-configurada`; rol
+    equivocado para la zona → `/sin-acceso`. Un solo chequeo por layout
+    cubre todas las pantallas del route group, no se repite por página.
+    `(doctor)` exige rol `doctor`; `(radyex)` exige `admin` o
+    `equipo_radyex` (bloquea `doctor`).
+  - **Nota para la Fase 4:** hoy `(radyex)` solo tiene el placeholder de
+    `/admin`, así que el layout de esa zona deja pasar a Equipo Radyex y
+    Administrador por igual. La restricción más fina ("esta pantalla es
+    solo del Administrador" — bitácora legal completa, doctores, reportes,
+    ver `docs/perfiles-y-acceso.md`) **no está implementada todavía**: se
+    agrega cuando esas pantallas existan, con un layout anidado dentro de
+    esas rutas específicas (p. ej. `app/(radyex)/admin/bitacora/layout.tsx`),
+    sin tocar el layout general de la zona.
+  - `app/login/actions.ts`: la redirección tras login exitoso ya no es fija
+    a `/ordenes` — lee el rol con `obtenerUsuarioConRol()` y usa
+    `rutaInicioPorRol()`; sin rol, manda a `/cuenta-no-configurada`.
+  - `app/cuenta-no-configurada/page.tsx` (nuevo) y `app/sin-acceso/page.tsx`
+    (nuevo): pantallas fuera de los layouts protegidos (si estuvieran
+    adentro, el propio guardia las volvería a rebotar ahí mismo → bucle
+    infinito). Ambas con botón "Cerrar sesión"; `sin-acceso` además tiene
+    "Ir a mi inicio" (usa `rutaInicioPorRol()`, cae a `/login` si no hay rol).
+  - Probado en navegador: sin sesión, `/ordenes` y `/admin` responden
+    307 → `/login`. Con la sesión real de prueba (rol Equipo Radyex/Admin):
+    `/admin` carga el panel, `/ordenes` rebota a `/sin-acceso` con "Ir a mi
+    inicio" apuntando a `/admin`. `npm run build` y `eslint` limpios.
+
+- **Fase 3 — renombrado de campos a español (2026-08-28).** Todos los
+  campos de `radyex-web/lib/data.ts` (`Doctor`, `Orden`, `ArchivoOrden`) se
+  renombraron de inglés a español, alineados 1:1 con las columnas reales
+  de la BD (`radyex-web/supabase/migrations/20260824120000_esquema_inicial.sql`),
+  para no tener que renombrar otra vez al conectar datos reales en la fase
+  4. `EstatusOrden` pasó a los valores del enum real (`pendiente`/
+  `en_proceso`/`finalizado`); se agregó `EstatusVisual` como capa aparte
+  para no tocar las clases CSS del sistema de diseño (que siguen en inglés:
+  `success`/`warn`/`pending`). Se eliminó `priority` (sin columna en la BD
+  y sin uso en ningún componente). Spec completa, con los campos
+  calculados/display que no tienen columna propia (p. ej. `iniciales`,
+  `edad`, `archivos`) y dos notas importantes (`nombreCompleto`/`correo`
+  del doctor viven en `usuarios`, no en `doctores`; `src` de un archivo
+  necesita URL firmada en fase 5, no es un rename directo de `ruta_r2`),
+  documentada en **`docs/mapeo-campos.md`**. `npm run build` y `eslint`
+  limpios; `/ordenes` sigue viéndose igual (verificado por revisión
+  exhaustiva de referencias, ya que la pantalla exige sesión de doctor).
+
+- **Fase 3 — `registrar_acceso()` enganchada al login del doctor
+  (2026-08-28), VERIFICADO EN VIVO.** `app/login/actions.ts` llama
+  `supabase.rpc('registrar_acceso')` justo después de resolver el rol y
+  antes del redirect final (si se llama después del `redirect()`, nunca se
+  ejecuta — `redirect()` corta lanzando), y solo cuando `rol === 'doctor'`
+  (Equipo Radyex/Administrador no tienen `ultimo_acceso` en `doctores`). La
+  llamada va en `try/catch`: si el RPC falla, se hace `console.error` y el
+  login sigue de todos modos — estampar el acceso es secundario, nunca debe
+  bloquear la entrada. **Confirmado con un doctor real que el timestamp
+  `ultimo_acceso` en `public.doctores` se actualiza correctamente al hacer
+  login.**
+
+- **FASE 3 (Auth + RLS) — COMPLETA (2026-08-28).** Los dos clientes de
+  Supabase, `proxy.ts`, el login real con landing por rol, la protección de
+  rutas por rol (con los casos huérfano y sin-acceso resueltos), el
+  renombrado de campos a español, y `registrar_acceso()` verificado en vivo
+  — todo lo de arriba junto cierra el corazón de la Fase 3 tal como la
+  describe `docs/roadmapp.md`. Sigue la Fase 4 (ver "Pendiente").
+
 ## En curso
-- Nada activo identificado en el repo.
+- Nada activo identificado en el repo. Sigue la Fase 4 (migrar el resto de
+  pantallas) — ver "Pendiente".
 
 ## Pendiente
+- **Prueba formal de rebote por rol del doctor:** la protección de rutas ya
+  quedó verificada con una sesión de Equipo Radyex/Admin (`/ordenes` rebota
+  a `/sin-acceso`), pero falta repetir la prueba con un usuario `doctor`
+  real: confirmar que un doctor es rebotado de la zona `(radyex)` (debe caer
+  en `/sin-acceso`), no solo que Equipo/Admin es rebotado de `(doctor)`.
+- **Audit log completo de LFPDPPP (módulo Admin), sigue pendiente —
+  DISTINTO de `registrar_acceso()`.** `registrar_acceso()` (ver "Hecho"
+  arriba) solo estampa el último login del doctor, una fila que se
+  sobrescribe en cada acceso. El requisito legal es otro: un registro
+  **append-only**, una fila por cada vez que alguien abre un
+  expediente/archivo clínico (quién, qué, cuándo — nunca sobrescribible).
+  Ya está diseñado en el esquema (`public.bitacora`, ver "Registro real de
+  la bitácora de auditoría" más abajo) pero no está construido. No
+  confundir los dos: uno es UX de doctor (fase 3, ya resuelto), el otro es
+  cumplimiento legal (fase 6, sigue pendiente).
+- **Fase 4, restricción admin-only dentro de `(radyex)`:** cuando se migren
+  bitácora/doctores/reportes, agregar ahí el chequeo "solo Administrador"
+  (ver nota en "Hecho", entrada del 2026-08-28) — el layout general de la
+  zona hoy solo exige admin o equipo_radyex.
+- **Fase 4 de la migración a Next.js: migrar el resto de pantallas**, una por una, usando "Mis órdenes" (`components/ordenes/`) como patrón (ver `docs/migracion-nextjs.md`). Orden sugerido: login/registro (cuando entre auth, fase 3) → nueva orden + lista → subir archivo → ver/descargar archivos → módulo admin (usuarios, bitácora, reportes) → buzón. Cada pantalla nueva extiende `app/radyex-ui.css` con las clases que le falten (hoy solo trae lo que usa el layout compartido y "Mis órdenes").
 - **Notificación de cumpleaños de doctores al equipo admin** (requiere backend — job programado o trigger de Supabase que revise `birthDate` y notifique al equipo; el frontend ya guarda el dato y tiene el TODO marcado en `radyex/doctores.html`).
-- Migración del prototipo estático a Next.js + Tailwind + shadcn/ui (stack definido en CLAUDE.md, aún no iniciado).
 - Integración real con Supabase (datos y auth) y Cloudflare R2 (almacenamiento de PDFs/imágenes).
 - **Registro real de la bitácora de auditoría** (`radyex/bitacora.html` ya tiene la interfaz completa con datos ficticios, pero no hay registro real de eventos) — requiere: triggers/llamadas desde la app en cada acción sensible (alta/edición de doctor, subida, cambio de estatus, visualización y descarga de archivos, consulta de la bitácora), tabla **append-only en Supabase con RLS que solo permita INSERT y SELECT** (nunca UPDATE/DELETE), y retención alineada a NOM-004 (5 años). Requisito legal LFPDPPP, no opcional. TODO marcado en `common.js` junto a `SEED_BITACORA`.
 - **Agregaciones reales para Reportes** (`radyex/reportes.html` ya tiene la interfaz con KPIs/gráfica sobre datos ficticios) — requiere queries de agregación (COUNT/GROUP BY) sobre la tabla de órdenes real. TODO marcado en el script de `radyex/reportes.html`.
 - **Envío real del buzón "Dudas o sugerencias"** (`doctor/dudas.html` ya tiene el formulario, validación y confirmación en UI) — requiere backend que tome asunto + mensaje + datos del doctor remitente y los envíe al correo personal de Monse (o a una bandeja compartida del equipo). TODO marcado en el script de `doctor/dudas.html`.
-- Autenticación real de doctores y Radyex (el prototipo no tiene login funcional), incluyendo permisos diferenciados admin vs. personal no-admin para la bitácora (ver `docs/bitacora-y-reportes.md` — personal no-admin no debería ver la bitácora legal completa, solo reportes operativos; hoy el prototipo no distingue roles dentro de Radyex).
+- Autenticación real de doctores y Radyex (el prototipo no tiene login funcional), incluyendo los 3 roles ya definidos en `docs/perfiles-y-acceso.md` (Administrador, Equipo Radyex, Doctor) — hoy el prototipo estático y `radyex-web` no distinguen roles dentro de Radyex, es trabajo de fase 2/3.
+- Mecánica de "solicitud pendiente + aviso a Monse" (aprobación de altas de doctor y de cambios sensibles a perfiles) — diseño cerrado en `docs/perfiles-y-acceso.md`, sin construir todavía; es de fase 2 (tabla) y fase 6 (flujo/UI).
+- **Revisar y aplicar el esquema SQL propuesto** en `radyex-web/supabase/migrations/` — el proyecto de Supabase ya existe y ya está vinculado (`supabase init` + `supabase link` corridos, 2026-08-26: existe `radyex-web/supabase/config.toml` y `.temp/project-ref`). Falta correr `supabase db push` cuando el usuario apruebe el contenido de las migraciones. Ver detalle en "Hecho" arriba.
+- **`ultimo_acceso` de paciente**: no existe (ni columna, ni función, ni política) — hoy el esquema solo lo resuelve para `doctores`. Definir si hace falta para `pacientes` antes de aplicar el esquema.
+- **Actualizar `assets/js/common.js` y `radyex-web/lib/data.ts` (`PAQUETES`)** para que coincidan con el contenido completo de paquetes ya confirmado por Monse y reflejado en el esquema SQL (`paquete_estudios`): falta "Trabajo" en Ortodoncia/Diagnóstico y ambos modelos en Implantología. Ver `docs/orden-de-estudio.md` § "Contenido exacto pre-marcado por paquete".
 - Despliegue en Netlify con dominio propio (hoy solo hay workflow de GitHub Pages).
 
 ## Decisiones tomadas
@@ -70,11 +338,16 @@
 - El widget "Próximos cumpleaños" (opcional del punto 1 de `docs/correcciones01.md`) sí se construyó, como vista de solo lectura marcada "Demostrativo" en `radyex/inicio.html`, porque no requería backend (solo lee `birthDate` de los doctores ya cargados) y da contexto visual de para qué sirve el campo nuevo sin implementar el aviso real.
 - Bitácora y Reportes se separaron en dos páginas/menús distintos (`radyex/bitacora.html` y `radyex/reportes.html`) en vez de un solo apartado, siguiendo la distinción explícita de `docs/bitacora-y-reportes.md`: una es registro legal de solo lectura, la otra son métricas de negocio filtrables — mezclarlas habría complicado los permisos por rol a futuro (personal no-admin sí ve reportes pero no la bitácora legal completa).
 - La gráfica de "Tendencia mensual" de Reportes usa datos derivados de las 10 órdenes ficticias compartidas (`RADYEX.getOrders()`) en vez de una serie mensual inventada aparte, para que el total de la gráfica siempre cuadre con el KPI "Total de estudios" — a costa de una gráfica con algunos meses en cero (solo hay pedidos de abril a diciembre 2025 en la semilla).
+- **Migración a Next.js — decisiones de la fase 1 (2026-08-18):**
+  - Las URLs de la vista Radyex viven bajo `/admin/*` (no `/radyex/*`) mientras que la vista Doctor usa rutas limpias sin prefijo (`/ordenes`, `/inicio`...): las dos vistas repiten nombres de pantalla ("inicio", "ordenes", "pacientes"), y como los route groups de Next.js (`(doctor)`, `(radyex)`) no agregan segmento a la URL, hacía falta un prefijo real para no chocar. Se eligió que el panel interno sea el que lleva el prefijo (`/admin`) porque el doctor es la cara pública del producto.
+  - Las clases del sistema de diseño (`app/radyex-ui.css`) se portaron casi literal de `assets/css/styles.css` (mismos nombres de clase: `.sidebar`, `.order-card`, `.modal-overlay`...) en vez de reescribir todo como utilidades de Tailwind sueltas: ese CSS ya estaba probado a 390px en el mockup, y reusarlo evita repetir a mano decenas de reglas de los tres breakpoints (880px / 640px / 480px) con alto riesgo de que algo quede ligeramente distinto. Tailwind sí se usa para los tokens de color/tipografía (`@theme` en `app/globals.css`) y para utilidades sueltas dentro de los componentes nuevos.
+  - Se reprodujo el flujo de "ver archivo" del mockup (visor de PDF en un modal encima del modal de paciente) tal cual, en vez de simplificarlo, porque es parte del comportamiento visible de "Mis órdenes" que la fase 1 tenía que igualar.
 
 ## Pendientes de resolver con Monse
-- Confirmar aprobación del mockup estático antes de iniciar la migración a Next.js/Supabase (cambios estructurales después de aprobar requieren cotización aparte).
-- Validar contenido y alcance real de la bitácora de auditoría (qué eventos debe registrar exactamente; la maqueta ya cubre alta/edición de doctor, subida, cambio de estatus, visualización y descarga de archivo, y consulta de la bitácora — confirmar si falta algo).
-- Confirmar si el personal Radyex no-admin (recepción/técnico) tendrá cuentas separadas de las de administración, ya que sus permisos de bitácora deben ser distintos (reportes sí, bitácora legal completa no) — hoy el prototipo tiene un solo perfil "Equipo Radyex" sin esa distinción.
+- ~~Confirmar aprobación del mockup estático~~ **Resuelto 2026-08-24: aprobado.**
+- ~~Confirmar si el personal Radyex no-admin tendrá cuentas separadas y permisos distintos de bitácora~~ **Resuelto 2026-08-24:** 3 roles formales, equipo Radyex sin bitácora legal completa. Ver `docs/perfiles-y-acceso.md`.
+- ~~Pacientes compartidos entre doctores~~ **Resuelto 2026-08-24:** paciente = una sola fila (expediente maestro de Radyex), órdenes con `doctor_id` propio; el doctor ve solo sus órdenes, Radyex ve todo. Ver `docs/perfiles-y-acceso.md`.
+- **Alcance del respaldo .rar al desactivar un doctor** (nueva, 2026-08-24): qué incluye exactamente (¿solo datos del doctor o también archivos de sus pacientes?) y a qué correo se envía. Ver `docs/perfiles-y-acceso.md`.
 - Confirmar si se usará Netlify + dominio propio en vez de GitHub Pages para el deploy final.
-- Validar con Monse el mapeo de estudios por paquete que se asumió (p. ej. Ortodoncia preselecciona cefalometría "Ricketts" como técnica por default; Implantología preselecciona FOV 12×9) — el papel no especifica técnica/FOV exactos por paquete.
+- ~~Validar con Monse el mapeo de estudios por paquete~~ **Resuelto 2026-08-26:** confirmó que cada paquete pre-marca su contenido completo — Ricketts, Digital y ambos modelos (Estudio+Trabajo) por default en los tres paquetes, FOV 12×9 en Implantología. Ver `docs/orden-de-estudio.md` § "Contenido exacto pre-marcado por paquete".
 - Pedir al diseñador un re-export de `radyex-logo.png` / `radyex-logo-white.png` con transparencia real (los que están en `assets/logo/` tienen el fondo blanco quemado en el pixel) — hoy el sitio no los usa, solo los `.svg`, pero probablemente se necesiten como raster para el PDF de resultados u otros usos fuera del navegador.

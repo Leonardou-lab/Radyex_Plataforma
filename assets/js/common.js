@@ -41,6 +41,7 @@ const RADYEX = (function () {
     barChart: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
     filePlus: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>',
     messageSquare: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    package: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>',
   };
 
   /* ---------- PDFs de ejemplo (contenido genérico para el visor) ---------- */
@@ -162,11 +163,13 @@ const RADYEX = (function () {
       id: "intraorales",
       label: "Radiografías intraorales",
       items: [
-        { id: "periapical", label: "Periapical", teeth: true },
-        { id: "oclusal", label: "Oclusal" },
-        { id: "superior", label: "Superior" },
-        { id: "inferior", label: "Inferior" },
-        { id: "aleta", label: "Aleta de mordida" },
+        // Periapical: "si-rx" = entrega física solo cuando el doctor elige RX
+        // (con Sensor es digital). Ver docs/orden-de-estudio.md.
+        { id: "periapical", label: "Periapical", teeth: true, entregaFisica: "si-rx" },
+        { id: "oclusal", label: "Oclusal", entregaFisica: true },
+        { id: "superior", label: "Superior", entregaFisica: true },
+        { id: "inferior", label: "Inferior", entregaFisica: true },
+        { id: "aleta", label: "Aleta de mordida", entregaFisica: true },
       ],
     },
     {
@@ -191,7 +194,7 @@ const RADYEX = (function () {
       id: "fotografias",
       label: "Fotografías (intraoral / extraoral)",
       items: [
-        { id: "foto-papel", label: "Papel fotográfico" },
+        { id: "foto-papel", label: "Papel fotográfico", entregaFisica: true },
         { id: "foto-digital", label: "Digital" },
       ],
     },
@@ -199,8 +202,8 @@ const RADYEX = (function () {
       id: "modelos",
       label: "Modelos",
       items: [
-        { id: "modelo-estudio", label: "Estudio" },
-        { id: "modelo-trabajo", label: "Trabajo" },
+        { id: "modelo-estudio", label: "Estudio", entregaFisica: true },
+        { id: "modelo-trabajo", label: "Trabajo", entregaFisica: true },
         { id: "modelo-3d", label: "Impreso 3D" },
         { id: "escaneo-intraoral", label: "Escaneo intraoral (3Shape / Invisalign)" },
       ],
@@ -269,6 +272,10 @@ const RADYEX = (function () {
       items: ["escaneo-intraoral"],
       fov: "12x9",
       nota: "Incluye diseño e impresión de guía quirúrgica (lo coordina Radyex).",
+      // La guía quirúrgica no es un estudio marcable del catálogo (no tiene
+      // checkbox propio), por eso su entrega física no se puede derivar de
+      // `items` como con los demás paquetes — se declara aparte.
+      entregaFisicaExtra: ["Guía quirúrgica"],
     },
   ];
 

@@ -97,6 +97,65 @@ adelante, para el esquema de base de datos y el formulario real en Next.js.
 
 Al elegir un paquete, se deben marcar automáticamente los estudios que lo componen.
 
+### Contenido exacto pre-marcado por paquete
+
+Confirmado con Monse (2026-08-26): cada paquete debe **pre-marcar su contenido
+completo** al elegirse — el doctor luego desmarca o cambia en el formulario lo que no
+quiera, no al revés. Esto precisa qué significa "cefalometría", "fotografías" y
+"modelos" arriba:
+
+- **Ortodoncia:** Panorámica, Lateral de cráneo, Cefalometría **Ricketts** (técnica
+  por default), Fotografías **Digital** (por default), Modelos **Estudio y Trabajo**
+  (ambos).
+- **Diagnóstico:** Panorámica, Fotografías **Digital** (por default), Modelos
+  **Estudio y Trabajo** (ambos).
+- **Implantología:** Tomografía 3D FOV **12×9** (por default) + guía quirúrgica (nota
+  en Indicaciones, no es un estudio marcable), Modelos **Estudio y Trabajo** (ambos),
+  Escaneo intraoral.
+
+Implementación de referencia (esquema): `radyex-web/supabase/migrations/20260824120100_catalogo_estudios_seed.sql`,
+tabla `paquete_estudios`. **Pendiente:** el mockup (`assets/js/common.js`) y
+`radyex-web/lib/data.ts` (`PAQUETES`) todavía no reflejan este contenido completo —
+hoy marcan de menos (falta "Trabajo" en Ortodoncia/Diagnóstico, y falta Modelos por
+completo en Implantología). Actualizar cuando se retome el front de "nueva orden".
+
+---
+
+## Entrega física (estudios que no se digitalizan)
+
+Decisión validada con Monse (2026-08-19): **todos** los estudios se mantienen en el
+formulario, ninguno se elimina. Los que no se pueden digitalizar llevan un badge
+visual "Entrega física" — es informativo, no bloquea la selección. El doctor sigue
+eligiendo Impreso/Digital como entrega general de la orden, pero estos estudios en
+particular **siempre** son de entrega física (el paciente los recoge en físico), sin
+importar esa elección general.
+
+Estudios/componentes que son de entrega física:
+
+- **Periapical** — solo cuando el doctor elige **RX** (con **Sensor** es digital).
+- **Oclusal, Superior, Inferior, Aleta de mordida** (radiografías intraorales).
+- **Papel fotográfico** (Digital, dentro de fotografías, no lleva el badge).
+- **Estudio, Trabajo** (modelos — Impreso 3D y Escaneo intraoral no llevan el badge).
+
+Nada en Radiografías extraorales, Cefalometría ni Tomografía 3D es de entrega física.
+
+### Paquetes: componentes de entrega física que incluyen
+
+- **Ortodoncia:** el componente de modelos (Estudio) es de entrega física.
+- **Diagnóstico:** el componente de modelos (Estudio) es de entrega física.
+- **Implantología:** modelos y **guía quirúrgica** son de entrega física — la guía
+  quirúrgica no es un estudio marcable del catálogo (no tiene checkbox propio, solo
+  la nota que se agrega a "Indicaciones"), por eso no se puede derivar solo de los
+  estudios que el paquete marca automáticamente.
+
+Implementación de referencia (mockup): `assets/js/common.js` — cada ítem del catálogo
+(`STUDY_CATEGORIES`) puede traer `entregaFisica: true` (siempre física) o
+`entregaFisica: "si-rx"` (el caso especial de Periapical). Cada paquete
+(`PAQUETES`) puede traer `entregaFisicaExtra: [...]` para componentes de entrega
+física que no son un estudio marcable. `doctor/nueva-orden.html` lee esos flags para
+pintar el badge — no está codificado a mano por pantalla. Mismos flags portados en
+`radyex-web/lib/data.ts` para cuando se migre esta pantalla (fase 4).
+
 ---
 
 ## Contexto: software de captura del técnico (EzDent-i) — NO va en el formulario del doctor

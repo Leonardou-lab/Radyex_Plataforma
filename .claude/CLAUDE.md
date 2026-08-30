@@ -18,6 +18,66 @@ interfaz y de los comentarios de código: **español**.
 - Netlify + dominio propio
 - Tipografías: Lexend (display) + Inter (UI)
 
+## Proyecto Next.js (`radyex-web/`)
+
+Migración en curso del prototipo estático a Next.js (ver `docs/roadmapp.md` y
+`docs/migracion-nextjs.md` para el detalle por fases). El código vive en
+`radyex-web/`, aparte del mockup:
+
+- `assets/`, `radyex/*.html`, `doctor/*.html`, `index.html` — **el mockup
+  estático se queda intacto como referencia** de diseño y datos. No se borra,
+  no se depende de él en runtime.
+- `radyex-web/` — la app real. Todavía sin Supabase/R2/auth (fases 2-3): lee
+  datos de una semilla local en TypeScript.
+
+### Rutas (App Router, route groups por rol)
+
+- `app/(doctor)/` — vista Doctor referente. URLs limpias sin prefijo:
+  `/ordenes`, `/inicio`, `/nueva-orden`, `/pacientes`, `/dudas` (las que no
+  sean `/ordenes` todavía no existen, son la fase 4).
+- `app/(radyex)/` — panel interno, agrupado bajo `/admin/*`
+  (`/admin`, `/admin/ordenes`, `/admin/doctores`, etc.) para no chocar con las
+  rutas de arriba, que repiten nombres de pantalla (ambas vistas tienen
+  "inicio", "ordenes", "pacientes"). Hoy solo existe `/admin` como placeholder.
+- Cada route group tiene su propio `layout.tsx`, pero los dos delegan en el
+  mismo `components/layout/SidebarShell.tsx` pasándole `role="doctor"` o
+  `role="radyex"` — ahí vive el estado del drawer móvil (`useState`, ≤640px).
+- `app/page.tsx` — portada con selector de rol (equivalente a `index.html`
+  del mockup), sin login todavía.
+
+### Dónde vive cada cosa
+
+- `lib/data.ts` — módulo de datos tipado (semilla): `SEED_DOCTORS`,
+  `SEED_ORDERS`, catálogo de estudios, utilidades (`calcAge`,
+  `daysUntilBirthday`, `initials`). Sin backend: las pantallas importan estos
+  arreglos directo, nada de `fetch` ni `sessionStorage`. Los `type` de este
+  archivo son la referencia para el esquema de Supabase en fase 2.
+- `components/layout/` — `Sidebar` (un componente, items por rol vía
+  `nav-items.ts`), `MobileTopbar`, `SidebarShell` (el layout compartido).
+- `components/<pantalla>/` — un componente por archivo, agrupados por
+  pantalla (p. ej. `components/ordenes/` para "Mis órdenes": `OrderList`,
+  `OrderCard`, `StatusPill`, `PatientModal`, `FileViewerModal`, `InfoItem`).
+  Esta carpeta es la plantilla comentada en español para migrar el resto de
+  pantallas (patrón en `docs/migracion-nextjs.md`): la página (`page.tsx`,
+  Server Component) solo trae datos de `lib/data.ts` y se los pasa por props
+  al componente de pantalla (`"use client"`, con el `useState` de la UI).
+- `app/globals.css` — tokens de marca como variables CSS + su mapeo al tema
+  de Tailwind v4 (bloque `@theme`) y a los slots semánticos de shadcn/ui.
+  Next/font de Lexend + Inter también se registra ahí (`--font-display`,
+  `--font-sans`).
+- `app/radyex-ui.css` — las clases del sistema de diseño portadas del mockup
+  (sidebar, botones, tarjetas de orden, chips, modal, drawer móvil...), con
+  los mismos nombres de clase que `assets/css/styles.css`. Se extiende
+  pantalla por pantalla conforme se migran (fase 4) — hoy solo trae lo que usa
+  el layout compartido y "Mis órdenes".
+- Íconos: `lucide-react` (componentes, no SVG a mano — sigue cumpliendo la
+  regla de "siempre Lucide, path oficial", solo que ahora es un import en vez
+  de copiar el `<svg>`).
+- `shadcn/ui` está inicializado (`components.json`, estilo `base-nova`) para
+  cuando haga falta un componente compuesto (diálogos, dropdowns) en fases
+  siguientes; la pantalla de referencia de esta fase usa las clases de
+  `radyex-ui.css`, no componentes de shadcn.
+
 ## Reglas de diseño
 
 - Paleta navy/teal ya definida en variables CSS (`--ink`, `--accent`, `--warn`,

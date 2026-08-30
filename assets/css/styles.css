@@ -291,6 +291,17 @@ input::placeholder, textarea::placeholder{color:var(--text-muted);}
 .checkbox-row{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text);}
 .checkbox-row input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--accent);flex-shrink:0;}
 
+/* Aviso informativo (no es un error) para estudios que no se digitalizan:
+   el paciente los recoge en físico aunque la orden diga "Digital". */
+.badge-entrega-fisica{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:700;color:var(--pending);
+  background:var(--pending-soft);border-radius:999px;
+  padding:3px 9px;margin:4px 0 0 28px;white-space:nowrap;
+  cursor:help;
+}
+.badge-entrega-fisica svg{flex-shrink:0;}
+
 .radio-pills{display:flex;gap:10px;flex-wrap:wrap;}
 .radio-pill{
   border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:11px 16px;
@@ -311,6 +322,13 @@ input::placeholder, textarea::placeholder{color:var(--text-muted);}
 .package-btn.active{border-color:var(--accent);background:var(--accent-soft);}
 .package-btn-title{font-family:'Lexend',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px;justify-content:space-between;}
 .package-btn-desc{font-size:11.5px;color:var(--text-muted);margin-top:5px;line-height:1.45;}
+.package-btn-fisica{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;color:var(--pending);
+  background:var(--pending-soft);border-radius:8px;
+  padding:5px 9px;margin-top:10px;
+}
+.package-btn-fisica svg{flex-shrink:0;}
 
 .study-section{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);}
 .study-section-title{font-family:'Lexend',sans-serif;font-weight:600;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:14px;}

@@ -324,6 +324,13 @@
      ========================================================== */
   const alertSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
 
+  /* Badge informativo (no es un error) para estudios que no se digitalizan:
+     se lee del catálogo (item.entregaFisica), nunca a mano por pantalla. */
+  const FISICA_TOOLTIP = 'Este estudio no se digitaliza; se entrega en físico y el paciente lo recoge.';
+  function fisicaBadgeHTML(idAttr, oculto){
+    return `<span class="badge-entrega-fisica"${idAttr || ''}${oculto ? ' style="display:none;"' : ''} title="${FISICA_TOOLTIP}">${RADYEX.ICONS.package} Entrega física</span>`;
+  }
+
   function toothRow(labelText, quadrants){
     const chips = q => q.map(t => `<button type="button" class="tooth-chip" data-tooth="${t}">${t}</button>`).join('');
     return `<div class="tooth-row">
@@ -358,6 +365,15 @@
     const itemsHtml = cat.items.map(item => {
       const idAttr = item.teeth ? ' id="chkPeriapical"' : (item.note ? ' id="chkCefOtro"' : '');
       const checkbox = `<label class="checkbox-row"><input type="checkbox" class="study-check" data-study="${item.id}" data-label="${item.label}"${idAttr}><span>${item.label}</span></label>`;
+
+      // Periapical: la entrega física depende de Sensor/RX (se decide en
+      // updatePeriapicalFisicaBadge, más abajo), por eso empieza oculta.
+      if (item.entregaFisica === 'si-rx') {
+        return `<div style="grid-column:1/-1;">${checkbox}${fisicaBadgeHTML(' id="periapicalFisicaBadge"', true)}${periapicalPanelHTML()}</div>`;
+      }
+      if (item.entregaFisica === true) {
+        return `<div>${checkbox}${fisicaBadgeHTML()}</div>`;
+      }
       if (!item.teeth && !item.note) return checkbox;
       const extra = item.teeth ? periapicalPanelHTML() : cefOtroPanelHTML();
       return `<div style="grid-column:1/-1;">${checkbox}${extra}</div>`;
@@ -390,14 +406,25 @@
   /* ---------- Periapical: Sensor/RX + dientes ---------- */
   const chkPeriapical = document.getElementById('chkPeriapical');
   const periapicalPanel = document.getElementById('periapicalPanel');
+  const periapicalFisicaBadge = document.getElementById('periapicalFisicaBadge');
+
+  // El badge de "Entrega física" de Periapical solo se muestra si el
+  // estudio está marcado Y el doctor eligió RX (con Sensor es digital).
+  function updatePeriapicalFisicaBadge(){
+    const tipo = document.querySelector('input[name=periapicalTipo]:checked')?.value;
+    periapicalFisicaBadge.style.display = (chkPeriapical.checked && tipo === 'RX') ? 'inline-flex' : 'none';
+  }
+
   chkPeriapical.addEventListener('change', () => {
     periapicalPanel.style.display = chkPeriapical.checked ? 'block' : 'none';
+    updatePeriapicalFisicaBadge();
     updatePackageStates();
   });
   document.querySelectorAll('input[name=periapicalTipo]').forEach(radio => {
     radio.addEventListener('change', () => {
       document.getElementById('pillSensor').classList.toggle('checked', radio.value === 'Sensor' && radio.checked);
       document.getElementById('pillRX').classList.toggle('checked', radio.value === 'RX' && radio.checked);
+      updatePeriapicalFisicaBadge();
     });
   });
   periapicalPanel.addEventListener('click', e => {
@@ -432,40 +459,93 @@
   });
 
   /* ---------- Paquetes ---------- */
+  // Qué componentes de un paquete son de entrega física: se deriva del
+  // catálogo (los `items` que traen entregaFisica === true), más los que
+  // el paquete declare aparte en `entregaFisicaExtra` (componentes que no
+  // son un estudio marcable, p. ej. la guía quirúrgica de Implantología).
+  const catalogoPlano = RADYEX.STUDY_CATEGORIES.flatMap(cat => cat.items);
+  function paqueteFisicaLabels(paquete){
+    const deCatalogo = paquete.items
+      .map(id => catalogoPlano.find(item => item.id === id))
+      .filter(item => item && item.entregaFisica === true)
+      .map(item => item.label);
+    return [...deCatalogo, ...(paquete.entregaFisicaExtra || [])];
+  }
+
   const packageRow = document.getElementById('packageRow');
-  packageRow.innerHTML = RADYEX.PAQUETES.map(p => `
-    <button type="button" class="package-btn" data-package="${p.id}">
-      <div class="package-btn-title">${p.label}</div>
-      <div class="package-btn-desc">${p.desc}${p.nota ? '<br>' + p.nota : ''}</div>
-    </button>
-  `).join('');
+  // Qué paquetes activó el doctor explícitamente (con un click), independiente
+  // de si sus checkboxes coinciden con los de otro paquete. Antes el estado
+  // "activo" se infería solo de los checkboxes (¿están todos marcados?), y como
+  // los estudios de Diagnóstico son un subconjunto exacto de los de Ortodoncia,
+  // marcar Ortodoncia encendía también el botón de Diagnóstico sin que lo
+  // hubieran clickeado. Con este Set, un paquete solo se prende por click.
+  const paquetesActivos = new Set();
+  packageRow.innerHTML = RADYEX.PAQUETES.map(p => {
+    const fisicos = paqueteFisicaLabels(p);
+    const fisicaHTML = fisicos.length
+      ? `<div class="package-btn-fisica" title="${FISICA_TOOLTIP}">${RADYEX.ICONS.package} Incluye entrega física: ${fisicos.join(', ')}</div>`
+      : '';
+    return `
+      <button type="button" class="package-btn" data-package="${p.id}">
+        <div class="package-btn-title">${p.label}</div>
+        <div class="package-btn-desc">${p.desc}${p.nota ? '<br>' + p.nota : ''}</div>
+        ${fisicaHTML}
+      </button>
+    `;
+  }).join('');
 
   packageRow.addEventListener('click', e => {
     const btn = e.target.closest('.package-btn');
     if (!btn) return;
     const paquete = RADYEX.PAQUETES.find(p => p.id === btn.dataset.package);
+    // Un segundo click sobre un paquete ya activo lo desselecciona (desmarca
+    // sus estudios); si no estaba activo, lo selecciona (los marca). Se
+    // pregunta al Set, no a la clase CSS: la clase la recalcula
+    // updatePackageStates() y puede no coincidir con lo que el doctor clickeó.
+    const activar = !paquetesActivos.has(paquete.id);
+
     paquete.items.forEach(id => {
       const chk = document.querySelector(`.study-check[data-study="${id}"]`);
-      if (chk && !chk.checked) { chk.checked = true; chk.dispatchEvent(new Event('change')); }
+      if (chk && chk.checked !== activar) { chk.checked = activar; chk.dispatchEvent(new Event('change')); }
     });
     if (paquete.fov) {
       const radio = document.querySelector(`input[name=fov][value="${paquete.fov}"]`);
-      if (radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+      if (radio && radio.checked !== activar) { radio.checked = activar; radio.dispatchEvent(new Event('change')); }
     }
     if (paquete.nota) {
       const indicaciones = document.getElementById('docIndicaciones');
-      if (!indicaciones.value.includes(paquete.nota)) {
-        indicaciones.value = indicaciones.value ? `${indicaciones.value}\n${paquete.nota}` : paquete.nota;
+      if (activar) {
+        if (!indicaciones.value.includes(paquete.nota)) {
+          indicaciones.value = indicaciones.value ? `${indicaciones.value}\n${paquete.nota}` : paquete.nota;
+        }
+      } else {
+        indicaciones.value = indicaciones.value
+          .split('\n')
+          .filter(linea => linea.trim() !== paquete.nota)
+          .join('\n');
       }
     }
+
+    if (activar) { paquetesActivos.add(paquete.id); } else { paquetesActivos.delete(paquete.id); }
     updatePackageStates();
   });
 
   function updatePackageStates(){
-    RADYEX.PAQUETES.forEach(p => {
-      const allChecked = p.items.every(id => document.querySelector(`.study-check[data-study="${id}"]`)?.checked);
+    // Un paquete activo se apaga solo si el doctor rompe sus requisitos a
+    // mano (destilda un estudio, o desactiva otro paquete que compartía un
+    // estudio con este) — pero nunca se prende solo: prenderlo requiere
+    // clickearlo (eso es lo que agrega su id a paquetesActivos, arriba).
+    // Así un paquete que resulta ser subconjunto de otro (p. ej. Diagnóstico
+    // dentro de Ortodoncia) no se enciende como efecto secundario.
+    Array.from(paquetesActivos).forEach(id => {
+      const p = RADYEX.PAQUETES.find(p => p.id === id);
+      const allChecked = p.items.every(itemId => document.querySelector(`.study-check[data-study="${itemId}"]`)?.checked);
       const fovOk = !p.fov || document.querySelector(`input[name=fov][value="${p.fov}"]`)?.checked;
-      packageRow.querySelector(`[data-package="${p.id}"]`).classList.toggle('active', allChecked && fovOk);
+      if (!allChecked || !fovOk) paquetesActivos.delete(id);
+    });
+
+    RADYEX.PAQUETES.forEach(p => {
+      packageRow.querySelector(`[data-package="${p.id}"]`).classList.toggle('active', paquetesActivos.has(p.id));
     });
   }
 

@@ -35,6 +35,11 @@ edita ni se borra) y de solo lectura desde la interfaz.
 - Objeto afectado (doctor, folio de orden o archivo/paciente)
 - Detalle opcional (p. ej. estatus anterior → nuevo)
 
+> Confirmado con Monse (2026-08-24): en el evento "subida de archivo" el actor debe
+> ser la persona específica del equipo Radyex que subió el archivo (no un genérico
+> "Equipo Radyex") — quiere poder saber quién subió cada reporte. Ver
+> `docs/perfiles-y-acceso.md`.
+
 ### Presentación (mockup, ahora)
 - Tabla/lista cronológica inversa con filas de ejemplo (datos ficticios).
 - Cada acción con su ícono Lucide (alta: user-plus · subida: upload · cambio de
@@ -76,10 +81,14 @@ registro legal.
 
 ## Permisos por perfil
 
-- **Admin (Radyex):** bitácora completa (todos los usuarios y eventos) + reportes
-  completos. Aquí vive el requisito legal.
-- **Personal Radyex no-admin** (recepción / técnico): reportes operativos; la
-  bitácora legal completa se reserva a admin.
+Confirmado con Monse (2026-08-24, ver `docs/perfiles-y-acceso.md`): la bitácora legal
+completa es **visibilidad solo-admin**, sin excepción.
+
+- **Administrador (Monse):** bitácora completa (todos los usuarios y eventos) +
+  reportes completos. Aquí vive el requisito legal.
+- **Equipo Radyex** (2 usuarios, no-admin): reportes operativos; **no** ve la
+  bitácora legal completa, ni siquiera de forma parcial o filtrada a su propia
+  actividad.
 - **Doctor:** **no** ve la bitácora global ni los reportes globales. (Opcional a
   futuro: su propia actividad y sus propias métricas, acotadas a lo suyo. Fuera de
   alcance en esta ronda.)
