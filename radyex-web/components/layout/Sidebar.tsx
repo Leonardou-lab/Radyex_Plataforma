@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { DOCTOR_NAV_ITEMS, RADYEX_NAV_ITEMS } from "./nav-items";
 import { getCurrentDoctor, getOrdersByDoctor, initials } from "@/lib/data";
+import { logout } from "@/app/login/actions";
 
 export type Rol = "doctor" | "radyex";
 
@@ -22,9 +23,9 @@ export function getUsuarioSidebar(role: Rol) {
   }
   const doctorActual = getCurrentDoctor();
   return {
-    nombre: doctorActual?.name ?? "",
+    nombre: doctorActual?.nombreCompleto ?? "",
     rolTexto: "Doctora referente",
-    iniciales: doctorActual ? initials(doctorActual.name) : "",
+    iniciales: doctorActual ? initials(doctorActual.nombreCompleto) : "",
   };
 }
 
@@ -99,10 +100,15 @@ export function Sidebar({ role, open, onNavigate }: SidebarProps) {
             <div className="sidebar-user-role">{usuario.rolTexto}</div>
           </div>
         </div>
-        <Link href="/" className="navitem" onClick={onNavigate}>
-          <LogOut size={18} strokeWidth={2} />
-          <span>Salir</span>
-        </Link>
+        {/* Server Action de components/layout/Sidebar.tsx -> app/login/actions.ts.
+            Antes este botón era un <Link href="/"> de relleno (sin login real
+            todavía); ahora cierra la sesión de Supabase de verdad. */}
+        <form action={logout}>
+          <button type="submit" className="navitem" onClick={onNavigate}>
+            <LogOut size={18} strokeWidth={2} />
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
       </div>
     </aside>
   );

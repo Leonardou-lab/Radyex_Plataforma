@@ -12,5 +12,5 @@ export default function OrdenesPage() {
   const doctor = getCurrentDoctor();
   const orders = getOrdersByDoctor(CURRENT_DOCTOR_ID);
 
-  return <OrderList orders={orders} doctorIniciales={doctor ? initials(doctor.name) : ""} />;
+  return <OrderList orders={orders} doctorIniciales={doctor ? initials(doctor.nombreCompleto) : ""} />;
 }

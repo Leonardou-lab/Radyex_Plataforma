@@ -43,8 +43,8 @@ export function FileViewerModal({ file, onClose }: FileViewerModalProps) {
             <FileText size={20} strokeWidth={2} />
           </div>
           <div>
-            <div className="viewer-name">{file.name}</div>
-            <div className="viewer-date">{file.date}</div>
+            <div className="viewer-name">{file.nombreArchivo}</div>
+            <div className="viewer-date">{file.fechaCaptura}</div>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export function FileViewerModal({ file, onClose }: FileViewerModalProps) {
         </div>
 
         <div className="viewer-actions">
-          <a className="btn-secondary" href={file.src} download={file.name}>
+          <a className="btn-secondary" href={file.src} download={file.nombreArchivo}>
             <Download size={16} strokeWidth={2} />
             Descargar
           </a>

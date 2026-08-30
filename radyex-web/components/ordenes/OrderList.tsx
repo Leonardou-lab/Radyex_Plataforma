@@ -20,9 +20,9 @@ type Filtro = "todos" | EstatusOrden;
 
 const FILTROS: { key: Filtro; label: string; color?: string }[] = [
   { key: "todos", label: "Todos" },
-  { key: "pending", label: "Pendiente", color: "var(--pending)" },
-  { key: "warn", label: "En proceso", color: "var(--warn)" },
-  { key: "success", label: "Finalizado", color: "var(--success)" },
+  { key: "pendiente", label: "Pendiente", color: "var(--pending)" },
+  { key: "en_proceso", label: "En proceso", color: "var(--warn)" },
+  { key: "finalizado", label: "Finalizado", color: "var(--success)" },
 ];
 
 /**
@@ -50,15 +50,15 @@ export function OrderList({ orders, doctorIniciales }: OrderListProps) {
   // Los números de las tarjetas de resumen (stats) son siempre del
   // total de órdenes del doctor, sin importar el filtro/búsqueda
   // activos — igual que en el mockup.
-  const totalEnProceso = orders.filter((o) => o.status === "warn").length;
-  const totalFinalizadas = orders.filter((o) => o.status === "success").length;
-  const totalPendientes = orders.filter((o) => o.status === "pending").length;
+  const totalEnProceso = orders.filter((o) => o.estatus === "en_proceso").length;
+  const totalFinalizadas = orders.filter((o) => o.estatus === "finalizado").length;
+  const totalPendientes = orders.filter((o) => o.estatus === "pendiente").length;
 
   const ordenesFiltradas = orders
-    .filter((o) => filtroActivo === "todos" || o.status === filtroActivo)
+    .filter((o) => filtroActivo === "todos" || o.estatus === filtroActivo)
     .filter((o) => {
       const q = busqueda.trim().toLowerCase();
-      return o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q);
+      return o.nombrePaciente.toLowerCase().includes(q) || o.folio.toLowerCase().includes(q);
     });
 
   return (
@@ -148,11 +148,11 @@ export function OrderList({ orders, doctorIniciales }: OrderListProps) {
           {ordenesFiltradas.length === 0 ? (
             <div className="empty-state">No encontramos órdenes con esos criterios.</div>
           ) : (
-            // `order.code` es el folio: único por orden, por eso sirve
-            // de key. React lo usa para saber qué tarjeta es cuál entre
-            // un render y el siguiente (por ejemplo, al filtrar).
+            // `order.folio` es único por orden, por eso sirve de key.
+            // React lo usa para saber qué tarjeta es cuál entre un
+            // render y el siguiente (por ejemplo, al filtrar).
             ordenesFiltradas.map((order) => (
-              <OrderCard key={order.code} order={order} onOpen={setOrdenAbierta} />
+              <OrderCard key={order.folio} order={order} onOpen={setOrdenAbierta} />
             ))
           )}
         </div>

@@ -24,7 +24,7 @@ type PatientModalProps = {
  */
 export function PatientModal({ order, onClose }: PatientModalProps) {
   // Años con archivos, más reciente primero.
-  const anios = Object.keys(order.files).sort((a, b) => Number(b) - Number(a));
+  const anios = Object.keys(order.archivos).sort((a, b) => Number(b) - Number(a));
   const [anioActivo, setAnioActivo] = useState(anios[0]);
   const [archivoEnVisor, setArchivoEnVisor] = useState<ArchivoOrden | null>(null);
 
@@ -38,7 +38,7 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
   }, [onClose]);
 
   const doctorReferente = getDoctorById(order.doctorId);
-  const archivosDelAnio = order.files[anioActivo] ?? [];
+  const archivosDelAnio = order.archivos[anioActivo] ?? [];
 
   return (
     <>
@@ -55,25 +55,25 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
           </button>
 
           <div className="modal-header">
-            <div className="modal-avatar">{order.init}</div>
+            <div className="modal-avatar">{order.iniciales}</div>
             <div>
-              <div className="modal-name">{order.name}</div>
+              <div className="modal-name">{order.nombrePaciente}</div>
               <div className="modal-folio">
-                {order.code} · {order.loc}
+                {order.folio} · {order.localidad}
               </div>
             </div>
             <div className="ml-auto">
-              <StatusPill status={order.status} />
+              <StatusPill status={order.estatus} />
             </div>
           </div>
 
           <div className="modal-info-grid">
-            <InfoItem icon={Stethoscope} label="Doctor referente" value={doctorReferente?.name ?? "—"} />
-            <InfoItem icon={Phone} label="Teléfono" value={order.phone} />
-            <InfoItem icon={Mail} label="Correo" value={order.email} />
-            <InfoItem icon={User} label="Edad" value={`${order.age} años`} />
-            <InfoItem icon={Calendar} label="Paciente desde" value={order.since} />
-            <InfoItem icon={LayoutGrid} label="Tipo de estudio" value={order.studyType} />
+            <InfoItem icon={Stethoscope} label="Doctor referente" value={doctorReferente?.nombreCompleto ?? "—"} />
+            <InfoItem icon={Phone} label="Teléfono" value={order.telefono} />
+            <InfoItem icon={Mail} label="Correo" value={order.correo} />
+            <InfoItem icon={User} label="Edad" value={`${order.edad} años`} />
+            <InfoItem icon={Calendar} label="Paciente desde" value={order.pacienteDesde} />
+            <InfoItem icon={LayoutGrid} label="Tipo de estudio" value={order.tipoEstudio} />
           </div>
 
           <div className="modal-section-title">
@@ -100,13 +100,13 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
               <div className="file-empty">Aún no hay archivos cargados para {anioActivo}.</div>
             ) : (
               archivosDelAnio.map((archivo) => (
-                <div className="file-row" key={archivo.name}>
+                <div className="file-row" key={archivo.nombreArchivo}>
                   <div className="file-icon">
                     <FileText size={16} strokeWidth={2} />
                   </div>
                   <div>
-                    <div className="file-name">{archivo.name}</div>
-                    <div className="file-date">{archivo.date}</div>
+                    <div className="file-name">{archivo.nombreArchivo}</div>
+                    <div className="file-date">{archivo.fechaCaptura}</div>
                   </div>
                   <div className="file-row-actions">
                     <button
@@ -124,7 +124,7 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
                       title="Descargar archivo"
                       aria-label="Descargar archivo"
                       href={archivo.src}
-                      download={archivo.name}
+                      download={archivo.nombreArchivo}
                     >
                       <Download size={15} strokeWidth={2} />
                     </a>

@@ -6,35 +6,47 @@
  * (nada de fetch ni sessionStorage). Cuando llegue Supabase (fase 2
  * del roadmap) estas mismas formas de datos (los `type`) van a
  * guiar el esquema de la base de datos.
+ *
+ * Los nombres de campo ya están en español y alineados 1:1 con las
+ * columnas reales de Supabase (ver docs/mapeo-campos.md para el
+ * detalle completo, incluyendo los campos calculados/display que NO
+ * tienen columna propia). Así, al conectar datos reales en la fase 4,
+ * el renombrado ya está hecho una sola vez.
  */
 
 /* ============================================================
    Tipos
    ============================================================ */
 
-// Estatus de una orden. Se usa para el color del chip/pill y del
-// borde izquierdo de la tarjeta (ver STATUS_MAP más abajo).
-export type EstatusOrden = "success" | "warn" | "pending";
+// Estatus de una orden. Coincide con el enum estatus_orden de la BD.
+export type EstatusOrden = "pendiente" | "en_proceso" | "finalizado";
+
+// Vocabulario VISUAL del sistema de diseño (colores/clases CSS:
+// --success, --warn, --pending en app/radyex-ui.css), compartido por
+// otras pantallas además de "órdenes" — no es vocabulario de negocio,
+// por eso se queda en inglés y aparte de EstatusOrden. STATUS_MAP de
+// abajo es la única traducción entre los dos.
+export type EstatusVisual = "success" | "warn" | "pending";
 
 export type Entrega = "Impreso" | "Digital";
 
 export type Doctor = {
   id: string;
-  name: string;
-  specialty: string;
-  clinic: string;
-  email: string;
-  phone: string;
-  username: string;
-  status: "active" | "inactive";
-  lastAccess: string;
+  nombreCompleto: string;
+  especialidad: string;
+  consultorio: string;
+  correo: string;
+  telefono: string;
+  nombreUsuario: string;
+  estatus: "activo" | "inactivo";
+  ultimoAcceso: string;
   /** Fecha de nacimiento en formato ISO (YYYY-MM-DD). */
-  birthDate: string;
+  fechaNacimiento: string;
 };
 
 export type ArchivoOrden = {
-  name: string;
-  date: string;
+  nombreArchivo: string;
+  fechaCaptura: string;
   /** Ruta del PDF de ejemplo que se abre en el visor. */
   src?: string;
 };
@@ -44,32 +56,31 @@ export type ArchivoOrden = {
 export type ArchivosPorAnio = Record<string, ArchivoOrden[]>;
 
 export type Orden = {
-  code: string;
-  name: string;
+  folio: string;
+  nombrePaciente: string;
   /** Iniciales del paciente, usadas en el avatar redondo. */
-  init: string;
-  loc: string;
-  date: string;
-  status: EstatusOrden;
+  iniciales: string;
+  localidad: string;
+  fechaSolicitud: string;
+  estatus: EstatusOrden;
   doctorId: string;
-  studyType: string;
-  priority: string;
+  tipoEstudio: string;
   entrega: Entrega;
-  phone: string;
-  email: string;
-  age: number;
-  since: string;
-  files: ArchivosPorAnio;
+  telefono: string;
+  correo: string;
+  edad: number;
+  pacienteDesde: string;
+  archivos: ArchivosPorAnio;
 };
 
 /* ============================================================
    Estatus: etiqueta + clase de color por estatus de orden
    ============================================================ */
 
-export const STATUS_MAP: Record<EstatusOrden, { label: string; cls: EstatusOrden }> = {
-  success: { label: "Finalizado", cls: "success" },
-  warn: { label: "En proceso", cls: "warn" },
-  pending: { label: "Pendiente", cls: "pending" },
+export const STATUS_MAP: Record<EstatusOrden, { label: string; cls: EstatusVisual }> = {
+  finalizado: { label: "Finalizado", cls: "success" },
+  en_proceso: { label: "En proceso", cls: "warn" },
+  pendiente: { label: "Pendiente", cls: "pending" },
 };
 
 /* ============================================================
@@ -77,10 +88,10 @@ export const STATUS_MAP: Record<EstatusOrden, { label: string; cls: EstatusOrden
    ============================================================ */
 
 export const SEED_DOCTORS: Doctor[] = [
-  { id: "dr-nunez", name: "Dra. Patricia Núñez", specialty: "Ortodoncia", clinic: "Consultorio Central Puebla", email: "patricia.nunez@clinicasonrisa.mx", phone: "222 310 4471", username: "patricia.nunez", status: "active", lastAccess: "20 dic 2025", birthDate: "1985-08-20" },
-  { id: "dr-cordero", name: "Dr. Iván Cordero", specialty: "Endodoncia", clinic: "Consultorio Reforma", email: "ivan.cordero@endopuebla.mx", phone: "222 455 8890", username: "ivan.cordero", status: "active", lastAccess: "17 oct 2025", birthDate: "1979-11-02" },
-  { id: "dr-solis", name: "Dra. Renata Solís", specialty: "Cirugía Maxilofacial", clinic: "Clínica Angelópolis", email: "renata.solis@maxilopuebla.mx", phone: "222 678 2205", username: "renata.solis", status: "active", lastAccess: "16 jun 2025", birthDate: "1990-07-22" },
-  { id: "dr-beltran", name: "Dr. Ricardo Beltrán", specialty: "Odontopediatría", clinic: "Consultorio Los Fuertes", email: "ricardo.beltran@sonrisakids.mx", phone: "222 190 3345", username: "ricardo.beltran", status: "inactive", lastAccess: "02 ene 2025", birthDate: "1982-09-05" },
+  { id: "dr-nunez", nombreCompleto: "Dra. Patricia Núñez", especialidad: "Ortodoncia", consultorio: "Consultorio Central Puebla", correo: "patricia.nunez@clinicasonrisa.mx", telefono: "222 310 4471", nombreUsuario: "patricia.nunez", estatus: "activo", ultimoAcceso: "20 dic 2025", fechaNacimiento: "1985-08-20" },
+  { id: "dr-cordero", nombreCompleto: "Dr. Iván Cordero", especialidad: "Endodoncia", consultorio: "Consultorio Reforma", correo: "ivan.cordero@endopuebla.mx", telefono: "222 455 8890", nombreUsuario: "ivan.cordero", estatus: "activo", ultimoAcceso: "17 oct 2025", fechaNacimiento: "1979-11-02" },
+  { id: "dr-solis", nombreCompleto: "Dra. Renata Solís", especialidad: "Cirugía Maxilofacial", consultorio: "Clínica Angelópolis", correo: "renata.solis@maxilopuebla.mx", telefono: "222 678 2205", nombreUsuario: "renata.solis", estatus: "activo", ultimoAcceso: "16 jun 2025", fechaNacimiento: "1990-07-22" },
+  { id: "dr-beltran", nombreCompleto: "Dr. Ricardo Beltrán", especialidad: "Odontopediatría", consultorio: "Consultorio Los Fuertes", correo: "ricardo.beltran@sonrisakids.mx", telefono: "222 190 3345", nombreUsuario: "ricardo.beltran", estatus: "inactivo", ultimoAcceso: "02 ene 2025", fechaNacimiento: "1982-09-05" },
 ];
 
 // El mockup no tiene login real: el doctor en sesión siempre es
@@ -88,35 +99,35 @@ export const SEED_DOCTORS: Doctor[] = [
 export const CURRENT_DOCTOR_ID = "dr-nunez";
 
 export const SEED_ORDERS: Orden[] = [
-  { code: "LN251220015", name: "Omar Mateo Rosas Lara", init: "OR", loc: "Puebla", date: "20 dic 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía 3D — 12×9", priority: "Normal", entrega: "Digital", phone: "222 145 7732", email: "omar.rosas@gmail.com", age: 34, since: "2023 · 3 años",
-    files: { "2025": [{ name: "Tomografía 3D.pdf", date: "20 dic 2025" }], "2024": [{ name: "Panorámica.pdf", date: "14 mar 2024" }], "2023": [{ name: "Periapical (serie).pdf", date: "02 feb 2023" }] } },
+  { folio: "LN251220015", nombrePaciente: "Omar Mateo Rosas Lara", iniciales: "OR", localidad: "Puebla", fechaSolicitud: "20 dic 2025", estatus: "finalizado", doctorId: "dr-nunez", tipoEstudio: "Tomografía 3D — 12×9", entrega: "Digital", telefono: "222 145 7732", correo: "omar.rosas@gmail.com", edad: 34, pacienteDesde: "2023 · 3 años",
+    archivos: { "2025": [{ nombreArchivo: "Tomografía 3D.pdf", fechaCaptura: "20 dic 2025" }], "2024": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "14 mar 2024" }], "2023": [{ nombreArchivo: "Periapical (serie).pdf", fechaCaptura: "02 feb 2023" }] } },
 
-  { code: "LN251017016", name: "Marilú Méndez Martínez", init: "MM", loc: "Puebla", date: "17 oct 2025", status: "success", doctorId: "dr-cordero", studyType: "Panorámica", priority: "Normal", entrega: "Digital", phone: "222 308 9912", email: "marilu.mendez@hotmail.com", age: 51, since: "2022 · 4 años",
-    files: { "2025": [{ name: "Panorámica.pdf", date: "17 oct 2025" }], "2023": [{ name: "Lateral de cráneo.pdf", date: "11 may 2023" }], "2022": [{ name: "Periapical (serie).pdf", date: "30 ago 2022" }] } },
+  { folio: "LN251017016", nombrePaciente: "Marilú Méndez Martínez", iniciales: "MM", localidad: "Puebla", fechaSolicitud: "17 oct 2025", estatus: "finalizado", doctorId: "dr-cordero", tipoEstudio: "Panorámica", entrega: "Digital", telefono: "222 308 9912", correo: "marilu.mendez@hotmail.com", edad: 51, pacienteDesde: "2022 · 4 años",
+    archivos: { "2025": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "17 oct 2025" }], "2023": [{ nombreArchivo: "Lateral de cráneo.pdf", fechaCaptura: "11 may 2023" }], "2022": [{ nombreArchivo: "Periapical (serie).pdf", fechaCaptura: "30 ago 2022" }] } },
 
-  { code: "LN250805010", name: "Luis Ángel Castillo Medellín", init: "LC", loc: "Puebla", date: "05 ago 2025", status: "warn", doctorId: "dr-solis", studyType: "Tomografía 3D — 16×9", priority: "Urgente", entrega: "Impreso", phone: "222 477 0156", email: "luis.castillo@outlook.com", age: 27, since: "2025 · 1 año",
-    files: { "2025": [{ name: "Tomografía 3D (en proceso).pdf", date: "05 ago 2025" }] } },
+  { folio: "LN250805010", nombrePaciente: "Luis Ángel Castillo Medellín", iniciales: "LC", localidad: "Puebla", fechaSolicitud: "05 ago 2025", estatus: "en_proceso", doctorId: "dr-solis", tipoEstudio: "Tomografía 3D — 16×9", entrega: "Impreso", telefono: "222 477 0156", correo: "luis.castillo@outlook.com", edad: 27, pacienteDesde: "2025 · 1 año",
+    archivos: { "2025": [{ nombreArchivo: "Tomografía 3D (en proceso).pdf", fechaCaptura: "05 ago 2025" }] } },
 
-  { code: "LN250802018", name: "Aline Daniela Vargas Sánchez", init: "AV", loc: "Puebla", date: "02 ago 2025", status: "success", doctorId: "dr-cordero", studyType: "Periapical", priority: "Normal", entrega: "Digital", phone: "222 590 4423", email: "aline.vargas@gmail.com", age: 19, since: "2024 · 2 años",
-    files: { "2025": [{ name: "Periapical (serie).pdf", date: "02 ago 2025" }], "2024": [{ name: "Panorámica.pdf", date: "19 nov 2024" }] } },
+  { folio: "LN250802018", nombrePaciente: "Aline Daniela Vargas Sánchez", iniciales: "AV", localidad: "Puebla", fechaSolicitud: "02 ago 2025", estatus: "finalizado", doctorId: "dr-cordero", tipoEstudio: "Periapical", entrega: "Digital", telefono: "222 590 4423", correo: "aline.vargas@gmail.com", edad: 19, pacienteDesde: "2024 · 2 años",
+    archivos: { "2025": [{ nombreArchivo: "Periapical (serie).pdf", fechaCaptura: "02 ago 2025" }], "2024": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "19 nov 2024" }] } },
 
-  { code: "TM250709012", name: "María Guadalupe Zarco Herrera", init: "MZ", loc: "Puebla", date: "09 jul 2025", status: "pending", doctorId: "dr-nunez", studyType: "Lateral de cráneo", priority: "Normal", entrega: "Impreso", phone: "222 612 8870", email: "maria.zarco@gmail.com", age: 62, since: "2025 · nuevo",
-    files: { "2025": [] } },
+  { folio: "TM250709012", nombrePaciente: "María Guadalupe Zarco Herrera", iniciales: "MZ", localidad: "Puebla", fechaSolicitud: "09 jul 2025", estatus: "pendiente", doctorId: "dr-nunez", tipoEstudio: "Lateral de cráneo", entrega: "Impreso", telefono: "222 612 8870", correo: "maria.zarco@gmail.com", edad: 62, pacienteDesde: "2025 · nuevo",
+    archivos: { "2025": [] } },
 
-  { code: "LN250708008", name: "Giovanna Fernanda Flores Gómez", init: "GF", loc: "Puebla", date: "08 jul 2025", status: "success", doctorId: "dr-solis", studyType: "Tomografía 3D — 12×9", priority: "Normal", entrega: "Digital", phone: "222 734 2298", email: "giovanna.flores@gmail.com", age: 29, since: "2023 · 3 años",
-    files: { "2025": [{ name: "Tomografía 3D.pdf", date: "08 jul 2025" }], "2024": [{ name: "Panorámica.pdf", date: "22 ene 2024" }], "2023": [{ name: "Periapical (serie).pdf", date: "15 jun 2023" }] } },
+  { folio: "LN250708008", nombrePaciente: "Giovanna Fernanda Flores Gómez", iniciales: "GF", localidad: "Puebla", fechaSolicitud: "08 jul 2025", estatus: "finalizado", doctorId: "dr-solis", tipoEstudio: "Tomografía 3D — 12×9", entrega: "Digital", telefono: "222 734 2298", correo: "giovanna.flores@gmail.com", edad: 29, pacienteDesde: "2023 · 3 años",
+    archivos: { "2025": [{ nombreArchivo: "Tomografía 3D.pdf", fechaCaptura: "08 jul 2025" }], "2024": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "22 ene 2024" }], "2023": [{ nombreArchivo: "Periapical (serie).pdf", fechaCaptura: "15 jun 2023" }] } },
 
-  { code: "LN250616002", name: "María Guillermina Alarcón de Martino", init: "MA", loc: "Puebla", date: "16 jun 2025", status: "warn", doctorId: "dr-cordero", studyType: "Panorámica", priority: "Normal", entrega: "Impreso", phone: "222 866 5541", email: "guille.alarcon@hotmail.com", age: 58, since: "2021 · 5 años",
-    files: { "2025": [{ name: "Panorámica (en proceso).pdf", date: "16 jun 2025" }], "2022": [{ name: "Tomografía 3D.pdf", date: "03 sep 2022" }], "2021": [{ name: "Periapical (serie).pdf", date: "10 abr 2021" }] } },
+  { folio: "LN250616002", nombrePaciente: "María Guillermina Alarcón de Martino", iniciales: "MA", localidad: "Puebla", fechaSolicitud: "16 jun 2025", estatus: "en_proceso", doctorId: "dr-cordero", tipoEstudio: "Panorámica", entrega: "Impreso", telefono: "222 866 5541", correo: "guille.alarcon@hotmail.com", edad: 58, pacienteDesde: "2021 · 5 años",
+    archivos: { "2025": [{ nombreArchivo: "Panorámica (en proceso).pdf", fechaCaptura: "16 jun 2025" }], "2022": [{ nombreArchivo: "Tomografía 3D.pdf", fechaCaptura: "03 sep 2022" }], "2021": [{ nombreArchivo: "Periapical (serie).pdf", fechaCaptura: "10 abr 2021" }] } },
 
-  { code: "TM250602018", name: "Damiana Uscanga Guadarrama", init: "DU", loc: "Puebla", date: "02 jun 2025", status: "pending", doctorId: "dr-solis", studyType: "Periapical", priority: "Normal", entrega: "Digital", phone: "222 901 3387", email: "damiana.uscanga@gmail.com", age: 41, since: "2025 · nuevo",
-    files: { "2025": [] } },
+  { folio: "TM250602018", nombrePaciente: "Damiana Uscanga Guadarrama", iniciales: "DU", localidad: "Puebla", fechaSolicitud: "02 jun 2025", estatus: "pendiente", doctorId: "dr-solis", tipoEstudio: "Periapical", entrega: "Digital", telefono: "222 901 3387", correo: "damiana.uscanga@gmail.com", edad: 41, pacienteDesde: "2025 · nuevo",
+    archivos: { "2025": [] } },
 
-  { code: "LN250520011", name: "Fernando Iván Rosales Pacheco", init: "FR", loc: "Puebla", date: "20 may 2025", status: "success", doctorId: "dr-nunez", studyType: "Tomografía 3D — 12×9", priority: "Normal", entrega: "Digital", phone: "222 220 6634", email: "fernando.rosales@gmail.com", age: 45, since: "2022 · 4 años",
-    files: { "2025": [{ name: "Tomografía 3D.pdf", date: "20 may 2025" }], "2022": [{ name: "Panorámica.pdf", date: "11 feb 2022" }] } },
+  { folio: "LN250520011", nombrePaciente: "Fernando Iván Rosales Pacheco", iniciales: "FR", localidad: "Puebla", fechaSolicitud: "20 may 2025", estatus: "finalizado", doctorId: "dr-nunez", tipoEstudio: "Tomografía 3D — 12×9", entrega: "Digital", telefono: "222 220 6634", correo: "fernando.rosales@gmail.com", edad: 45, pacienteDesde: "2022 · 4 años",
+    archivos: { "2025": [{ nombreArchivo: "Tomografía 3D.pdf", fechaCaptura: "20 may 2025" }], "2022": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "11 feb 2022" }] } },
 
-  { code: "LN250415009", name: "Karla Sofía Domínguez Reyes", init: "KD", loc: "Puebla", date: "15 abr 2025", status: "warn", doctorId: "dr-nunez", studyType: "Periapical", priority: "Normal", entrega: "Impreso", phone: "222 349 7712", email: "karla.dominguez@outlook.com", age: 24, since: "2024 · 2 años",
-    files: { "2025": [{ name: "Periapical (serie) (en proceso).pdf", date: "15 abr 2025" }], "2024": [{ name: "Panorámica.pdf", date: "03 sep 2024" }] } },
+  { folio: "LN250415009", nombrePaciente: "Karla Sofía Domínguez Reyes", iniciales: "KD", localidad: "Puebla", fechaSolicitud: "15 abr 2025", estatus: "en_proceso", doctorId: "dr-nunez", tipoEstudio: "Periapical", entrega: "Impreso", telefono: "222 349 7712", correo: "karla.dominguez@outlook.com", edad: 24, pacienteDesde: "2024 · 2 años",
+    archivos: { "2025": [{ nombreArchivo: "Periapical (serie) (en proceso).pdf", fechaCaptura: "15 abr 2025" }], "2024": [{ nombreArchivo: "Panorámica.pdf", fechaCaptura: "03 sep 2024" }] } },
 ];
 
 // PDFs de ejemplo (contenido genérico, anonimizado) para el visor
@@ -130,21 +141,21 @@ const PDF_SINGLE = "/ejemplos/ejemplo-radiografia.pdf";
 // resto de los archivos que no traen `src` usan la radiografía de
 // ejemplo individual. Se corre una sola vez al cargar el módulo.
 SEED_ORDERS.forEach((orden) => {
-  const aniosConArchivos = Object.keys(orden.files)
+  const aniosConArchivos = Object.keys(orden.archivos)
     .map(Number)
-    .filter((anio) => (orden.files[anio] ?? []).length > 0);
+    .filter((anio) => (orden.archivos[anio] ?? []).length > 0);
 
   if (aniosConArchivos.length > 0) {
     const anioMasAntiguo = String(Math.min(...aniosConArchivos));
-    const archivoAncla = orden.files[anioMasAntiguo][0];
-    orden.files[anioMasAntiguo].push({
-      name: "Paquete de estudio inicial.pdf",
-      date: archivoAncla.date,
+    const archivoAncla = orden.archivos[anioMasAntiguo][0];
+    orden.archivos[anioMasAntiguo].push({
+      nombreArchivo: "Paquete de estudio inicial.pdf",
+      fechaCaptura: archivoAncla.fechaCaptura,
       src: PDF_PACKAGE,
     });
   }
 
-  Object.values(orden.files).forEach((archivos) => {
+  Object.values(orden.archivos).forEach((archivos) => {
     archivos.forEach((archivo) => {
       if (!archivo.src) archivo.src = PDF_SINGLE;
     });
@@ -374,7 +385,7 @@ export function initials(fullName: string): string {
    ============================================================ */
 
 // Edad a partir de la fecha de nacimiento (usado si algún día se
-// deja de guardar `age` a mano en la orden y se calcula del
+// deja de guardar `edad` a mano en la orden y se calcula del
 // paciente real).
 export function calcAge(birthDateStr: string): number | null {
   const birth = new Date(`${birthDateStr}T12:00:00`);
