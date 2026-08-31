@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, FileText, Eye, Download, Stethoscope, Phone, Mail, User, Calendar, LayoutGrid } from "lucide-react";
-import { getDoctorById, type Orden, type ArchivoOrden } from "@/lib/data";
+import { type Orden, type ArchivoOrden } from "@/lib/data";
 import { StatusPill } from "./StatusPill";
 import { InfoItem } from "./InfoItem";
 import { FileViewerModal } from "./FileViewerModal";
@@ -37,7 +37,6 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  const doctorReferente = getDoctorById(order.doctorId);
   const archivosDelAnio = order.archivos[anioActivo] ?? [];
 
   return (
@@ -68,7 +67,7 @@ export function PatientModal({ order, onClose }: PatientModalProps) {
           </div>
 
           <div className="modal-info-grid">
-            <InfoItem icon={Stethoscope} label="Doctor referente" value={doctorReferente?.nombreCompleto ?? "—"} />
+            <InfoItem icon={Stethoscope} label="Doctor referente" value={order.doctorNombre ?? "—"} />
             <InfoItem icon={Phone} label="Teléfono" value={order.telefono} />
             <InfoItem icon={Mail} label="Correo" value={order.correo} />
             <InfoItem icon={User} label="Edad" value={`${order.edad} años`} />

@@ -1,5 +1,5 @@
 # Estado del proyecto
-Última actualización: 2026-08-28
+Última actualización: 2026-08-30
 
 ## Hecho
 - Prototipo estático navegable (HTML/CSS/JS plano, sin framework aún) con `index.html` selector de rol.
@@ -291,6 +291,71 @@
   — todo lo de arriba junto cierra el corazón de la Fase 3 tal como la
   describe `docs/roadmapp.md`. Sigue la Fase 4 (ver "Pendiente").
 
+- **`/ordenes` (vista Doctor) conectada a datos REALES de Supabase
+  (2026-08-30).** Último pendiente de la Fase 3. La pantalla se ve y se
+  comporta igual; lo único que cambió es la fuente de datos: ya no lee
+  `SEED_ORDERS` de `lib/data.ts`, sino la BD vía consulta-en-servidor +
+  `mapearOrden`. Es el MOLDE que copian las pantallas de la Fase 4.
+  - `app/(doctor)/ordenes/page.tsx` pasó de Server Component síncrono (leía
+    el seed) a **Server Component `async`**: crea el cliente con
+    `lib/server.ts`, consulta `ordenes` con join a `pacientes` y a
+    `orden_estudios` / `catalogo_estudios` / `catalogo_fov`, ordena por
+    `fecha_solicitud` desc, y pasa el arreglo ya mapeado por props a
+    `OrderList`. `OrderList` y el resto de componentes visuales
+    (`OrderCard`, `StatusPill`, `PatientModal`, `InfoItem`,
+    `FileViewerModal`) **no se tocaron**.
+  - **No se filtra por doctor en el código**: se confía en la RLS
+    (`doctor_id = auth.uid()`, policy "un doctor ve solo sus propias
+    ordenes"). Vacío sin error = ese doctor no tiene órdenes, no es bug.
+    `OrderList` ya muestra su estado vacío con `orders = []` sin tronar.
+  - `app/(doctor)/ordenes/mapeo.ts` (nuevo): función pura
+    `mapearOrden(filaDB) => Orden` con el mapeo columna→prop comentado en
+    español (folio, `pacientes.nombre_completo`, `calcAge` sobre
+    `fecha_nacimiento` para la edad, `pacientes.created_at` →
+    "Paciente desde", resumen de `orden_estudios` + FOV → "Tipo de
+    estudio", etc.). Reutiliza `calcAge` e `initials` de `lib/data.ts`.
+    Cada pantalla de la Fase 4 tendrá su propio `mapeo.ts` con esta forma.
+  - **Archivos por año del modal de paciente NO conectados** (viven en
+    Cloudflare R2, fase 5): `mapearOrden` deja un solo año — el de la
+    solicitud — con lista vacía, que es la forma que `PatientModal` ya
+    sabe mostrar ("Aún no hay archivos cargados para 2025."). Marcado con
+    `// TODO (fase 5 - R2)` en `mapeo.ts`.
+  - **Cambio de comportamiento que quedó pendiente en esta ronda:** "Doctor
+    referente" en `PatientModal` se resolvía con
+    `getDoctorById(order.doctorId)` contra `SEED_DOCTORS`; con `doctor_id`
+    real (uuid) esa búsqueda no encontraba nada y el campo mostraba "—".
+    **Resuelto el 2026-08-30 — ver la entrada siguiente.**
+  - Detalle menor: la fecha se formatea con `toLocaleDateString("es-MX")`
+    y el FOV sale de `catalogo_fov.etiqueta` ("12 × 9"), así que el texto
+    puede diferir mínimamente de la semilla escrita a mano ("12×9",
+    "dic" vs "dic."). La BD es ahora la fuente de verdad.
+  - `npm run build` y `eslint` limpios; `/ordenes` queda como ruta
+    dinámica (`ƒ`), server-rendered on demand.
+
+- **"Doctor referente" del modal de `/ordenes` ya sale de datos reales
+  (2026-08-30).** Cierra el "—" que había quedado de la conexión anterior:
+  - `app/(doctor)/ordenes/page.tsx`: la consulta suma un join de dos saltos
+    `ordenes.doctor_id → doctores → usuarios` (`doctores ( usuarios (
+    nombre_completo ) )`) — el nombre del doctor no vive en `doctores` sino
+    en `usuarios.nombre_completo`. El resto de la consulta no cambió. La RLS
+    deja pasar el join porque, en la vista del doctor, cada `doctor_id` es
+    él mismo (policies "un doctor ve su propia fila" en `doctores` y
+    `usuarios`).
+  - `app/(doctor)/ordenes/mapeo.ts`: `mapearOrden` devuelve un campo nuevo
+    `doctorNombre: string` con ese nombre; respaldo `"—"` si viniera nulo.
+  - `components/ordenes/PatientModal.tsx`: "Doctor referente" se lee de
+    `order.doctorNombre` en vez de `getDoctorById(order.doctorId)`. Se quitó
+    el import de `getDoctorById` de este archivo. `OrderList`/`OrderCard`
+    NO se tocaron — el campo viaja en el objeto `order` que ya se pasa tal
+    cual al modal.
+  - `lib/data.ts`: se agregó `doctorNombre?: string` (opcional) al tipo
+    `Orden`, para que `SEED_ORDERS` siga compilando sin cambios.
+  - `getDoctorById` ya no lo usa ningún componente directamente, pero sigue
+    vivo vía `getCurrentDoctor()` (lib/data.ts), que `Sidebar.tsx` todavía
+    llama contra la semilla — no se borró nada, queda anotado para revisar
+    aparte.
+  - `npm run build` y `eslint` limpios.
+
 ## En curso
 - Nada activo identificado en el repo. Sigue la Fase 4 (migrar el resto de
   pantallas) — ver "Pendiente".
@@ -315,7 +380,7 @@
   bitácora/doctores/reportes, agregar ahí el chequeo "solo Administrador"
   (ver nota en "Hecho", entrada del 2026-08-28) — el layout general de la
   zona hoy solo exige admin o equipo_radyex.
-- **Fase 4 de la migración a Next.js: migrar el resto de pantallas**, una por una, usando "Mis órdenes" (`components/ordenes/`) como patrón (ver `docs/migracion-nextjs.md`). Orden sugerido: login/registro (cuando entre auth, fase 3) → nueva orden + lista → subir archivo → ver/descargar archivos → módulo admin (usuarios, bitácora, reportes) → buzón. Cada pantalla nueva extiende `app/radyex-ui.css` con las clases que le falten (hoy solo trae lo que usa el layout compartido y "Mis órdenes").
+- **Fase 4 de la migración a Next.js: migrar el resto de pantallas**, una por una, usando "Mis órdenes" (`components/ordenes/` + `app/(doctor)/ordenes/page.tsx` + `app/(doctor)/ordenes/mapeo.ts`) como patrón (ver `docs/migracion-nextjs.md`). El molde ya incluye la conexión a Supabase: página Server Component `async` que consulta con el cliente de `lib/server.ts` y traduce con un `mapeo.ts` propio (función pura `mapearOrden`); confiar en la RLS, no filtrar por rol en el código. Orden sugerido: nueva orden + lista → subir archivo → ver/descargar archivos → módulo admin (usuarios, bitácora, reportes) → buzón. Cada pantalla nueva extiende `app/radyex-ui.css` con las clases que le falten (hoy solo trae lo que usa el layout compartido y "Mis órdenes").
 - **Notificación de cumpleaños de doctores al equipo admin** (requiere backend — job programado o trigger de Supabase que revise `birthDate` y notifique al equipo; el frontend ya guarda el dato y tiene el TODO marcado en `radyex/doctores.html`).
 - Integración real con Supabase (datos y auth) y Cloudflare R2 (almacenamiento de PDFs/imágenes).
 - **Registro real de la bitácora de auditoría** (`radyex/bitacora.html` ya tiene la interfaz completa con datos ficticios, pero no hay registro real de eventos) — requiere: triggers/llamadas desde la app en cada acción sensible (alta/edición de doctor, subida, cambio de estatus, visualización y descarga de archivos, consulta de la bitácora), tabla **append-only en Supabase con RLS que solo permita INSERT y SELECT** (nunca UPDATE/DELETE), y retención alineada a NOM-004 (5 años). Requisito legal LFPDPPP, no opcional. TODO marcado en `common.js` junto a `SEED_BITACORA`.

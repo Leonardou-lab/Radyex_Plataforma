@@ -27,8 +27,10 @@ Migración en curso del prototipo estático a Next.js (ver `docs/roadmapp.md` y
 - `assets/`, `radyex/*.html`, `doctor/*.html`, `index.html` — **el mockup
   estático se queda intacto como referencia** de diseño y datos. No se borra,
   no se depende de él en runtime.
-- `radyex-web/` — la app real. Todavía sin Supabase/R2/auth (fases 2-3): lee
-  datos de una semilla local en TypeScript.
+- `radyex-web/` — la app real. Auth + RLS por rol ya conectados a Supabase
+  (fase 3). La pantalla `/ordenes` ya lee datos reales de Supabase; el resto
+  de pantallas todavía leen de una semilla local en TypeScript (`lib/data.ts`)
+  hasta la fase 4. R2 (archivos) sigue pendiente (fase 5).
 
 ### Rutas (App Router, route groups por rol)
 
@@ -47,11 +49,14 @@ Migración en curso del prototipo estático a Next.js (ver `docs/roadmapp.md` y
 
 ### Dónde vive cada cosa
 
-- `lib/data.ts` — módulo de datos tipado (semilla): `SEED_DOCTORS`,
-  `SEED_ORDERS`, catálogo de estudios, utilidades (`calcAge`,
-  `daysUntilBirthday`, `initials`). Sin backend: las pantallas importan estos
-  arreglos directo, nada de `fetch` ni `sessionStorage`. Los `type` de este
-  archivo son la referencia para el esquema de Supabase en fase 2.
+- `lib/data.ts` — tipos de dominio (`Orden`, `Doctor`, `EstatusOrden`...),
+  utilidades (`calcAge`, `daysUntilBirthday`, `initials`, `STATUS_MAP`) y la
+  semilla local (`SEED_DOCTORS`, `SEED_ORDERS`, catálogo de estudios). Los
+  `type` son la referencia del esquema de Supabase y el molde que espera la
+  UI. `/ordenes` ya NO usa `SEED_ORDERS` (lee de Supabase — ver
+  `components/<pantalla>/` abajo), pero sí sigue usando los `type` y las
+  utilidades; el resto de pantallas todavía importan los arreglos del seed
+  directo hasta la fase 4.
 - `components/layout/` — `Sidebar` (un componente, items por rol vía
   `nav-items.ts`), `MobileTopbar`, `SidebarShell` (el layout compartido).
 - `components/<pantalla>/` — un componente por archivo, agrupados por
@@ -59,8 +64,13 @@ Migración en curso del prototipo estático a Next.js (ver `docs/roadmapp.md` y
   `OrderCard`, `StatusPill`, `PatientModal`, `FileViewerModal`, `InfoItem`).
   Esta carpeta es la plantilla comentada en español para migrar el resto de
   pantallas (patrón en `docs/migracion-nextjs.md`): la página (`page.tsx`,
-  Server Component) solo trae datos de `lib/data.ts` y se los pasa por props
-  al componente de pantalla (`"use client"`, con el `useState` de la UI).
+  Server Component `async`) trae los datos de Supabase con el cliente de
+  `lib/server.ts`, los traduce al molde de la UI con un `mapeo.ts` propio de
+  la pantalla (`app/(doctor)/ordenes/mapeo.ts` — función pura `mapearOrden`,
+  con el mapeo columna→prop comentado), y pasa el arreglo ya mapeado por
+  props al componente de pantalla (`"use client"`, con el `useState` de la
+  UI). No se filtra por doctor/rol en el código: lo hace la RLS. Los
+  archivos del `PatientModal` siguen sin conectar (fase 5 - R2).
 - `app/globals.css` — tokens de marca como variables CSS + su mapeo al tema
   de Tailwind v4 (bloque `@theme`) y a los slots semánticos de shadcn/ui.
   Next/font de Lexend + Inter también se registra ahí (`--font-display`,

@@ -64,6 +64,15 @@ export type Orden = {
   fechaSolicitud: string;
   estatus: EstatusOrden;
   doctorId: string;
+  /**
+   * Nombre completo del doctor referente (dueño de la orden). Campo
+   * CALCULADO/DISPLAY: sale del join `ordenes → doctores → usuarios`
+   * (columna `usuarios.nombre_completo` — en `doctores` no hay nombre),
+   * no de una columna de `ordenes`. Opcional porque la semilla
+   * (`SEED_ORDERS`) no lo trae; con datos de Supabase `mapearOrden`
+   * siempre lo llena.
+   */
+  doctorNombre?: string;
   tipoEstudio: string;
   entrega: Entrega;
   telefono: string;
