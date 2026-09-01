@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/server";
 import { initials } from "@/lib/data";
 import { OrderList } from "@/components/ordenes/OrderList";
-import { mapearOrden, type FilaOrdenDB } from "./mapeo";
+import { mapearOrden, type FilaOrdenDB } from "@/lib/mapeo-ordenes";
 
 // Pantalla "Mis órdenes" — MOLDE de la Fase 4 (ver docs/migracion-nextjs.md).
 //

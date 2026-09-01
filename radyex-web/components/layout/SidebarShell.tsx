@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sidebar, getUsuarioSidebar, type Rol } from "./Sidebar";
+import { Sidebar, type Rol, type UsuarioSidebar } from "./Sidebar";
 import { MobileTopbar } from "./MobileTopbar";
 
 type SidebarShellProps = {
   role: Rol;
+  /** Usuario en sesión, resuelto en el layout (servidor). */
+  usuario: UsuarioSidebar;
   children: React.ReactNode;
 };
 
@@ -21,9 +23,8 @@ type SidebarShellProps = {
  * (MobileTopbar) como el overlay y el propio <Sidebar> necesitan
  * leerlo o cambiarlo — por eso "sube" al componente padre en común.
  */
-export function SidebarShell({ role, children }: SidebarShellProps) {
+export function SidebarShell({ role, usuario, children }: SidebarShellProps) {
   const [open, setOpen] = useState(false);
-  const usuario = getUsuarioSidebar(role);
 
   function closeDrawer() {
     setOpen(false);
@@ -53,7 +54,7 @@ export function SidebarShell({ role, children }: SidebarShellProps) {
         aria-hidden="true"
       />
 
-      <Sidebar role={role} open={open} onNavigate={closeDrawer} />
+      <Sidebar role={role} usuario={usuario} open={open} onNavigate={closeDrawer} />
 
       <main className="main">{children}</main>
     </div>

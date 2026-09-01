@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { SidebarShell } from "@/components/layout/SidebarShell";
-import { obtenerUsuarioConRol } from "@/lib/auth";
+import { obtenerUsuarioConRol, etiquetaRol } from "@/lib/auth";
+import { initials } from "@/lib/data";
 
 // Layout de toda la vista Radyex (panel interno): mismo Sidebar
 // compartido, ahora con el rol "radyex" (rutas bajo /admin/*).
@@ -31,5 +32,17 @@ export default async function RadyexLayout({ children }: { children: React.React
     redirect("/sin-acceso");
   }
 
-  return <SidebarShell role="radyex">{children}</SidebarShell>;
+  return (
+    <SidebarShell
+      role="radyex"
+      usuario={{
+        nombre: usuario.nombre,
+        rolTexto: etiquetaRol(rol),
+        iniciales: initials(usuario.nombre),
+        totalOrdenes: 0, // el badge de órdenes es solo de la vista Doctor
+      }}
+    >
+      {children}
+    </SidebarShell>
+  );
 }

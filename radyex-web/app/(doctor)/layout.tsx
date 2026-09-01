@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { SidebarShell } from "@/components/layout/SidebarShell";
-import { obtenerUsuarioConRol } from "@/lib/auth";
+import { obtenerUsuarioConRol, etiquetaRol } from "@/lib/auth";
+import { createClient } from "@/lib/server";
+import { initials } from "@/lib/data";
 
 // Layout de toda la vista Doctor: envuelve cada pantalla bajo este
 // route group con el Sidebar + drawer móvil ya configurados para
@@ -31,5 +33,29 @@ export default async function DoctorLayout({ children }: { children: React.React
     redirect("/sin-acceso");
   }
 
-  return <SidebarShell role="doctor">{children}</SidebarShell>;
+  // Badge de "Mis órdenes" en el Sidebar: total de órdenes del doctor en
+  // sesión. La RLS ya limita `ordenes` a las suyas (doctor_id = auth.uid()),
+  // así que un count sin filtros da el número correcto. `head: true` = solo
+  // el conteo, sin traer filas.
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("ordenes")
+    .select("*", { count: "exact", head: true });
+  if (error) {
+    console.error("No se pudo contar las órdenes del doctor:", error.message);
+  }
+
+  return (
+    <SidebarShell
+      role="doctor"
+      usuario={{
+        nombre: usuario.nombre,
+        rolTexto: etiquetaRol(rol),
+        iniciales: initials(usuario.nombre),
+        totalOrdenes: count ?? 0,
+      }}
+    >
+      {children}
+    </SidebarShell>
+  );
 }

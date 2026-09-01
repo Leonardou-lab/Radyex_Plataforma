@@ -4,33 +4,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { DOCTOR_NAV_ITEMS, RADYEX_NAV_ITEMS } from "./nav-items";
-import { getCurrentDoctor, getOrdersByDoctor, initials } from "@/lib/data";
 import { logout } from "@/app/login/actions";
 
 export type Rol = "doctor" | "radyex";
 
 /**
- * Datos del usuario en sesión para el Sidebar y la barra móvil.
- * Todavía no hay login real (fase 3): el doctor en sesión siempre
- * es el mismo (CURRENT_DOCTOR_ID en lib/data.ts) y el personal
- * Radyex se muestra como un solo perfil genérico, igual que en el
- * mockup. Exportada porque MobileTopbar también necesita las
- * iniciales para su avatar.
+ * Datos del usuario en sesión que necesita el Sidebar (y, vía
+ * SidebarShell, la barra móvil). Los resuelve en el servidor el
+ * layout de cada route group (`app/(doctor)/layout.tsx` /
+ * `app/(radyex)/layout.tsx`): nombre y rol reales desde `usuarios`,
+ * y el conteo de órdenes desde la BD con RLS. Se bajan por props
+ * porque este componente es "use client" y no consulta Supabase.
  */
-export function getUsuarioSidebar(role: Rol) {
-  if (role === "radyex") {
-    return { nombre: "Equipo Radyex", rolTexto: "Personal interno", iniciales: "RX" };
-  }
-  const doctorActual = getCurrentDoctor();
-  return {
-    nombre: doctorActual?.nombreCompleto ?? "",
-    rolTexto: "Doctora referente",
-    iniciales: doctorActual ? initials(doctorActual.nombreCompleto) : "",
-  };
-}
+export type UsuarioSidebar = {
+  nombre: string;
+  rolTexto: string;
+  iniciales: string;
+  /** Total de órdenes del doctor en sesión. En la vista Radyex es 0 (no se usa). */
+  totalOrdenes: number;
+};
 
 type SidebarProps = {
   role: Rol;
+  /** Usuario en sesión, resuelto en el layout (servidor). */
+  usuario: UsuarioSidebar;
   /** En móvil, si el drawer está abierto (agrega la clase "open"). */
   open: boolean;
   /** Se llama al hacer click en un ítem del menú (cierra el drawer en móvil). */
@@ -46,15 +43,9 @@ type SidebarProps = {
  * `usePathname()` (hook de Next.js) da la URL actual para marcar el
  * ítem activo — por eso este componente necesita "use client".
  */
-export function Sidebar({ role, open, onNavigate }: SidebarProps) {
+export function Sidebar({ role, usuario, open, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const items = role === "doctor" ? DOCTOR_NAV_ITEMS : RADYEX_NAV_ITEMS;
-  const usuario = getUsuarioSidebar(role);
-
-  // El badge de "Mis órdenes" necesita el total de órdenes del
-  // doctor en sesión (no aplica para la vista Radyex).
-  const doctorActual = getCurrentDoctor();
-  const totalOrdenesDoctor = doctorActual ? getOrdersByDoctor(doctorActual.id).length : 0;
 
   return (
     <aside className={`sidebar${open ? " open" : ""}`}>
@@ -86,7 +77,7 @@ export function Sidebar({ role, open, onNavigate }: SidebarProps) {
             >
               <Icon size={18} strokeWidth={2} />
               <span>{item.label}</span>
-              {item.badge === "ordenesDoctor" && <span className="badge">{totalOrdenesDoctor}</span>}
+              {item.badge === "ordenesDoctor" && <span className="badge">{usuario.totalOrdenes}</span>}
             </Link>
           );
         })}

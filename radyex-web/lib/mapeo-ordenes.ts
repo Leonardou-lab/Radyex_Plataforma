@@ -1,9 +1,15 @@
 /**
- * RADYEX — Mapeo de datos para la pantalla "Mis órdenes" (vista Doctor).
+ * RADYEX — Mapeo de datos de órdenes: "fila de Supabase → molde que la UI
+ * ya espera" (el tipo `Orden` de lib/data.ts).
  *
- * Aquí vive la traducción "fila de Supabase → molde que la UI ya espera".
- * Este archivo es el MOLDE de la Fase 4: cada pantalla que se migre después
- * tendrá su propio `mapeo.ts` con la misma idea — la página (Server
+ * Vive en `lib/` porque lo comparten las DOS pantallas de órdenes: la del
+ * Doctor (`app/(doctor)/ordenes/`, ya migrada) y la del equipo Radyex
+ * (`app/(radyex)/admin/ordenes/`, Fase 4). Las dos hacen la misma consulta
+ * y el mismo mapeo; solo cambia el alcance que aplica la RLS (el Doctor ve
+ * las suyas, Radyex ve todas).
+ *
+ * Este archivo es el MOLDE de la Fase 4: cada entidad que se migre tendrá
+ * su propio `mapeo-<entidad>.ts` con la misma idea — la página (Server
  * Component) hace la consulta y pasa el resultado por esta función antes de
  * dárselo al componente cliente.
  *

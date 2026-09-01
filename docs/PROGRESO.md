@@ -350,11 +350,42 @@
     cual al modal.
   - `lib/data.ts`: se agregó `doctorNombre?: string` (opcional) al tipo
     `Orden`, para que `SEED_ORDERS` siga compilando sin cambios.
-  - `getDoctorById` ya no lo usa ningún componente directamente, pero sigue
-    vivo vía `getCurrentDoctor()` (lib/data.ts), que `Sidebar.tsx` todavía
-    llama contra la semilla — no se borró nada, queda anotado para revisar
-    aparte.
+  - `getDoctorById` ya no lo usa ningún componente directamente (queda vivo
+    solo dentro de `lib/data.ts`). No se borró; ver la limpieza anotada en
+    la entrada del Bloque 0, más abajo.
   - `npm run build` y `eslint` limpios.
+
+- **Fase 4 · Bloque 0 — Cimientos (2026-08-31).** Groundwork antes de migrar
+  pantallas nuevas; sin UI nueva. Plan en `docs/migracion-nextjs.md`.
+  - **0.1 Sidebar con sesión real.** `components/layout/Sidebar.tsx` y
+    `SidebarShell.tsx` ya no leen la semilla (`getCurrentDoctor` /
+    `getOrdersByDoctor` / `getUsuarioSidebar`, eliminada): reciben un prop
+    `usuario: UsuarioSidebar` (`nombre`, `rolTexto`, `iniciales`,
+    `totalOrdenes`) que arma el layout de cada route group en el servidor.
+    `lib/auth.ts::obtenerUsuarioConRol()` ahora también trae
+    `usuarios.nombre_completo` (campo `nombre`); nueva `etiquetaRol()` para
+    el texto bajo el nombre (doctor → "Doctor referente", equipo_radyex →
+    "Equipo Radyex", admin → "Administración" — antes era "Doctora
+    referente" / "Personal interno" fijos). El badge de "Mis órdenes" sale
+    de un `select("*", { count: "exact", head: true })` sobre `ordenes` en
+    `app/(doctor)/layout.tsx` (la RLS lo limita al doctor en sesión); en
+    `(radyex)` el badge es 0 (no aplica a esa vista).
+  - **0.2** `mapearOrden` + `FilaOrdenDB` movidos de
+    `app/(doctor)/ordenes/mapeo.ts` a `lib/mapeo-ordenes.ts` (`git mv`,
+    historia preservada) para que la pantalla de Órdenes de Radyex los
+    reuse sin importar cruzando route groups. Import de
+    `app/(doctor)/ordenes/page.tsx` actualizado a `@/lib/mapeo-ordenes`.
+  - **0.3** `lib/auth.ts::exigirAdmin()` — guard que hace
+    `redirect("/sin-acceso")` si el rol no es `admin`, pensado para un
+    `layout.tsx` anidado en `app/(radyex)/admin/<pantalla>/` (bitácora /
+    doctores / reportes, Bloque 3). Todavía no se usa; queda listo.
+  - Los accesores de semilla `getCurrentDoctor`, `getOrdersByDoctor`,
+    `getDoctorById`, `getDoctors`, `getOrders` y la constante
+    `CURRENT_DOCTOR_ID` ya no los usa ningún componente (solo se
+    referencian entre sí dentro de `lib/data.ts`). **No se borraron** —
+    limpieza aparte cuando se migre "Nueva orden" y se confirme que del
+    seed solo queda vivo el catálogo de estudios.
+  - `npm run build`, `tsc --noEmit` y `eslint` limpios.
 
 ## En curso
 - Nada activo identificado en el repo. Sigue la Fase 4 (migrar el resto de
