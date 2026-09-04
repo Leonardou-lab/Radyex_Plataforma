@@ -342,8 +342,13 @@
   function periapicalPanelHTML(){
     return `<div class="study-subpanel" id="periapicalPanel" style="display:none;">
       <div class="radio-pills" style="margin-bottom:14px;">
-        <label class="radio-pill checked" id="pillSensor"><input type="radio" name="periapicalTipo" value="Sensor" checked> Sensor</label>
-        <label class="radio-pill" id="pillRX"><input type="radio" name="periapicalTipo" value="RX"> RX</label>
+        <!-- REGLA: el `value` de todo control de opción fija sale SIEMPRE en el
+             formato canónico de la BD, nunca en el de display. Aquí la columna
+             orden_estudios.tipo_captura tiene check ('sensor','rx') en minúscula,
+             así que el value va en minúscula y el texto que ve el doctor
+             (Sensor / RX) se queda igual. Ver docs/orden-de-estudio.md. -->
+        <label class="radio-pill checked" id="pillSensor"><input type="radio" name="periapicalTipo" value="sensor" checked> Sensor</label>
+        <label class="radio-pill" id="pillRX"><input type="radio" name="periapicalTipo" value="rx"> RX</label>
       </div>
       ${toothRow('Infantil', RADYEX.DIENTES_FDI.infantil)}
       ${toothRow('Adulto', RADYEX.DIENTES_FDI.adulto)}
@@ -410,9 +415,10 @@
 
   // El badge de "Entrega física" de Periapical solo se muestra si el
   // estudio está marcado Y el doctor eligió RX (con Sensor es digital).
+  // Se compara contra el value canónico de la BD ('rx'), no contra el label.
   function updatePeriapicalFisicaBadge(){
     const tipo = document.querySelector('input[name=periapicalTipo]:checked')?.value;
-    periapicalFisicaBadge.style.display = (chkPeriapical.checked && tipo === 'RX') ? 'inline-flex' : 'none';
+    periapicalFisicaBadge.style.display = (chkPeriapical.checked && tipo === 'rx') ? 'inline-flex' : 'none';
   }
 
   chkPeriapical.addEventListener('change', () => {
@@ -422,8 +428,8 @@
   });
   document.querySelectorAll('input[name=periapicalTipo]').forEach(radio => {
     radio.addEventListener('change', () => {
-      document.getElementById('pillSensor').classList.toggle('checked', radio.value === 'Sensor' && radio.checked);
-      document.getElementById('pillRX').classList.toggle('checked', radio.value === 'RX' && radio.checked);
+      document.getElementById('pillSensor').classList.toggle('checked', radio.value === 'sensor' && radio.checked);
+      document.getElementById('pillRX').classList.toggle('checked', radio.value === 'rx' && radio.checked);
       updatePeriapicalFisicaBadge();
     });
   });

@@ -112,6 +112,12 @@ textarea:focus-visible,
   transition: all .15s ease;
 }
 .btn-secondary:hover { border-color: var(--ink-soft); background: var(--bg); }
+.btn-ghost {
+  background: none; color: var(--text-muted); border: none; border-radius: 8px;
+  padding: 8px 10px; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { color: var(--ink); background: var(--bg); }
+.btn-block { width: 100%; justify-content: center; }
 
 /* ====== Stat cards ====== */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
@@ -181,6 +187,56 @@ textarea:focus-visible,
 .status-pill.pending .dot { background: var(--pending); }
 
 .chevron { color: var(--text-muted); flex-shrink: 0; }
+
+/* ====== Solicitudes en revisión (Mis órdenes, vista Doctor) ======
+   Lo que el doctor ya envió y Radyex todavía no procesa. Se parece a una
+   .order-card pero NO lo es: no tiene folio ni estatus de orden, y no se
+   puede abrir (por eso sin cursor:pointer ni borde de estatus). */
+.revision-row {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+}
+.revision-pill {
+  padding: 6px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0; white-space: nowrap;
+  background: var(--pending-soft); color: var(--pending);
+}
+.revision-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pending); }
+
+/* ====== Revisión de una solicitud (panel interno) ====== */
+.revision-dato {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-muted); margin-bottom: 14px;
+}
+.revision-dato strong { color: var(--ink); font-weight: 600; }
+.revision-bloque {
+  border-top: 1px solid var(--border); padding-top: 14px; margin-bottom: 14px;
+  font-size: 13.5px; color: var(--text);
+}
+.revision-bloque-titulo {
+  font-family: var(--font-display), sans-serif; font-weight: 600; font-size: 13px;
+  color: var(--ink); margin-bottom: 8px;
+}
+.revision-estudios { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.revision-estudios li { font-size: 13.5px; color: var(--ink); }
+.revision-estudio-detalle { color: var(--text-muted); font-size: 12.5px; }
+.revision-datos-tecleados {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px;
+}
+/* Los candidatos de deduplicación: lista corta con scroll propio, para que el
+   modal no crezca sin control cuando hay muchas coincidencias. */
+.revision-candidatos {
+  margin-top: 8px; max-height: 190px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 12px;
+}
+.revision-vacio { padding: 12px 14px; font-size: 12.5px; color: var(--text-muted); }
+.revision-acciones { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.aviso-exito {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+  background: var(--success-soft); color: var(--success);
+  border-radius: 12px; padding: 12px 16px; font-size: 13.5px; font-weight: 600;
+}
 
 /* ====== Estado vacío ====== */
 .empty-state { text-align: center; padding: 48px 0; color: var(--text-muted); font-size: 14px; }
@@ -347,6 +403,206 @@ textarea:focus-visible,
 }
 
 /* ============================================================
+   FORMULARIOS (pantalla "Nueva orden" del doctor — fase 4, 3.2)
+   Portado de assets/css/styles.css, mismos nombres de clase.
+   ============================================================ */
+
+/* ---- Paneles ---- */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; }
+.panel-title {
+  font-family: var(--font-display), sans-serif; font-weight: 600; font-size: 15.5px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.panel-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+/* ---- Campos ---- */
+.field { margin-bottom: 18px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+label.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+label.field-label .opt { font-weight: 500; color: var(--text-muted); font-size: 12px; }
+.field-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+/* El mensaje de error vive oculto y solo se muestra cuando el campo tiene
+   la clase .invalid — el estado lo pone React con useState, no el DOM a mano. */
+.field-error { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; align-items: center; gap: 5px; }
+.field.invalid .field-error { display: flex; }
+.field.invalid input, .field.invalid select, .field.invalid textarea {
+  border-color: var(--danger) !important; background: var(--danger-soft);
+}
+
+/* OJO con el `:not([data-slot])`: este bloque estiliza los campos de los
+   formularios portados del mockup, pero un selector de elemento+atributo
+   (`input[type=email]`, especificidad 0,1,1) le GANA a cualquier clase suelta
+   de Tailwind (0,1,0). Sin la exclusión, este `padding` pisaba el `pl-8` que
+   la pantalla de login le pone a sus inputs para dejarle sitio al ícono, y el
+   ícono terminaba encimado con el texto y el cursor. Los componentes de
+   shadcn/ui siempre traen `data-slot`, así que excluirlos deja el CSS del
+   mockup donde debe estar sin invadirlos. */
+input[type=text]:not([data-slot]), input[type=email]:not([data-slot]),
+input[type=tel]:not([data-slot]), input[type=number]:not([data-slot]),
+input[type=date]:not([data-slot]), input[type=password]:not([data-slot]),
+select:not([data-slot]), textarea:not([data-slot]) {
+  width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border);
+  font-size: 14px; font-family: var(--font-sans), sans-serif; background: var(--surface); color: var(--text);
+}
+textarea:not([data-slot]) { resize: vertical; min-height: 90px; font-family: var(--font-sans), sans-serif; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2367738C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+}
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
+.input-with-icon { position: relative; }
+/* pointer-events:none para que el ícono no se coma el click ni empuje el
+   cursor de texto: el click siempre cae en el input. */
+.input-with-icon svg {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+/* El `:not([data-slot])` aquí NO es para excluir a shadcn (estos inputs son
+   del mockup): es para EMPATAR la especificidad del bloque de arriba, que
+   también lo lleva. Sin él, `input[type=text]:not([data-slot])` (0,2,1) le
+   gana a `.input-with-icon input` (0,1,1) y el padding-left de 40px se pierde
+   → el ícono se encima con el texto. Con los dos empatados, gana este por ir
+   después en el archivo, que es lo que se quiere. */
+.input-with-icon input:not([data-slot]) { padding-left: 40px; }
+
+/* Resaltado temporal del bloque al que se llevó la vista tras un envío
+   fallido, para los grupos que NO son un campo enfocable (las pills de
+   Entrega, los chips de dientes). Usa los tokens de aviso ya existentes, no
+   los de error destructivo: es "te falta esto", no "esto está roto". */
+.resaltado-error {
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px var(--warn-soft), 0 0 0 1.5px var(--warn);
+  transition: box-shadow .2s ease;
+}
+
+/* Dato que se muestra pero no se edita (p. ej. el perfil del doctor en
+   "Nueva orden": sale de la sesión y no tiene columna en `ordenes`). */
+.dato-solo-lectura {
+  padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 14px;
+}
+
+.checkbox-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--text); }
+.checkbox-row input[type=checkbox] { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); flex-shrink: 0; }
+
+/* Aviso informativo (no es un error) para estudios que no se digitalizan:
+   el paciente los recoge en físico aunque la orden diga "Digital". */
+.badge-entrega-fisica {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; color: var(--pending);
+  background: var(--pending-soft); border-radius: 999px;
+  padding: 3px 9px; margin: 4px 0 0 28px; white-space: nowrap; cursor: help;
+}
+.badge-entrega-fisica svg { flex-shrink: 0; }
+
+/* ---- Pills de opción (Entrega, Sensor/RX) ---- */
+.radio-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+.radio-pill {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 11px 16px;
+  display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 600; color: var(--text-muted);
+  flex: 1; min-width: 140px; transition: all .15s ease;
+}
+.radio-pill input { accent-color: var(--accent); width: 16px; height: 16px; }
+.radio-pill.checked { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+
+/* ---- Paquetes de selección rápida ---- */
+.package-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.package-btn {
+  flex: 1; min-width: 200px; text-align: left; border: 1.5px solid var(--border); border-radius: 14px;
+  background: var(--surface); padding: 14px 16px; cursor: pointer; transition: all .15s ease;
+}
+.package-btn:hover { border-color: var(--accent); }
+.package-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+.package-btn-title {
+  font-family: var(--font-display), sans-serif; font-weight: 700; font-size: 14.5px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+}
+.package-btn-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
+.package-btn-fisica {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: var(--pending);
+  background: var(--pending-soft); border-radius: 8px; padding: 5px 9px; margin-top: 10px;
+}
+.package-btn-fisica svg { flex-shrink: 0; }
+
+/* ---- Secciones de estudios ---- */
+.study-section { border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; background: var(--surface); }
+.study-section-title {
+  font-family: var(--font-display), sans-serif; font-weight: 600; font-size: 14.5px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.study-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 11px 18px; }
+.study-subpanel {
+  margin-top: 14px; padding: 14px 16px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 12px;
+}
+
+/* ---- Carta dental FDI (Periapical) ---- */
+.tooth-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 10px; }
+.tooth-row:last-child { margin-bottom: 0; }
+.tooth-row-label {
+  font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: .4px; width: 100%; margin-bottom: 2px;
+}
+.tooth-chip {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-family: var(--font-sans), sans-serif; font-size: 11.5px; font-weight: 600;
+  padding: 4px 7px; border-radius: 6px; min-width: 28px; text-align: center; transition: all .12s ease;
+}
+.tooth-chip:hover { border-color: var(--accent); }
+.tooth-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tooth-sep { width: 1px; align-self: stretch; background: var(--border); margin: 0 3px; }
+.tooth-dot-sep { color: var(--text-muted); font-weight: 700; margin: 0 4px; }
+
+/* ---- Tarjetas de FOV (Tomografía 3D) ---- */
+.fov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.fov-card {
+  border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 14px 12px; cursor: pointer;
+  background: var(--surface); transition: all .15s ease;
+}
+.fov-card:hover { border-color: var(--accent); }
+.fov-card.checked { border-color: var(--accent); background: var(--accent-soft); }
+.fov-card-title {
+  font-family: var(--font-display), sans-serif; font-weight: 700; font-size: 14px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+.fov-card-title input { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; }
+.fov-card-help { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.4; padding-left: 23px; }
+
+/* ---- Combobox de búsqueda (paciente ya referido) ---- */
+.combobox { position: relative; }
+.search-results {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(35, 31, 32, .12);
+  max-height: 240px; overflow-y: auto; z-index: 20; display: none;
+}
+.search-results.open { display: block; }
+.search-result-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; width: 100%; text-align: left;
+  border: none; background: none; font-size: 13.5px; color: var(--text);
+}
+.search-result-item:hover { background: var(--bg); }
+.search-result-item .sr-sub { color: var(--text-muted); font-size: 12px; }
+.selected-chip {
+  display: inline-flex; align-items: center; gap: 10px; background: var(--accent-soft);
+  border: 1px solid var(--accent); border-radius: 12px; padding: 9px 14px;
+  font-size: 13.5px; font-weight: 600; color: var(--ink); margin-top: 8px;
+}
+.selected-chip button { background: none; border: none; color: var(--accent-dark); display: flex; }
+.mini-avatar {
+  width: 34px; height: 34px; border-radius: 9px; background: var(--pending-soft); color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display), sans-serif; font-weight: 700; font-size: 12.5px; flex-shrink: 0;
+}
+
+/* ---- Ícono grande del panel de confirmación ---- */
+.dropzone-icon {
+  width: 52px; height: 52px; border-radius: 14px; background: var(--accent-soft); color: var(--accent-dark);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+}
+
+/* ============================================================
    Adaptación a móvil (≤640px): sidebar como drawer off-canvas
    con hamburguesa, barra superior fija, todo apilado a una
    columna, modal casi a pantalla completa, objetivos táctiles
@@ -435,4 +691,33 @@ textarea:focus-visible,
   .modal-close { width: 44px; height: 44px; top: 14px; right: 14px; }
   .modal-info-grid { grid-template-columns: 1fr; }
   .file-action { width: 44px; height: 44px; }
+
+  /* ---- Formularios: una columna, objetivos táctiles ≥44px ---- */
+  .field-row { grid-template-columns: 1fr; }
+  /* Mismo `:not([data-slot])` que en el bloque de escritorio: si no, este
+     padding volvía a encimar el ícono del login en móvil. */
+  input[type=text]:not([data-slot]), input[type=email]:not([data-slot]),
+  input[type=tel]:not([data-slot]), input[type=number]:not([data-slot]),
+  input[type=date]:not([data-slot]), input[type=password]:not([data-slot]),
+  select:not([data-slot]), textarea:not([data-slot]) { min-height: 44px; padding: 12px 14px; }
+  .btn-primary, .btn-secondary, .btn-ghost { min-height: 44px; }
+  .radio-pill { min-height: 44px; }
+  .checkbox-row input[type=checkbox] { width: 20px; height: 20px; }
+
+  /* ---- Nueva orden: paquetes y carta dental ---- */
+  .package-row { flex-direction: column; }
+  .package-btn { min-height: 44px; }
+  .study-grid, .fov-grid { grid-template-columns: 1fr; }
+  /* Los ítems de grid no se encogen por debajo del contenido de sus hijos por
+     defecto (min-width:auto implícito) — sin esto, el scroll horizontal de
+     .tooth-row termina empujando el ancho de toda la página. Bug real ya
+     encontrado y corregido en el mockup; no quitar. */
+  .study-grid > * { min-width: 0; }
+  .tooth-row { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .tooth-chip { min-width: 32px; padding: 8px 7px; flex-shrink: 0; }
+
+  /* ---- Solicitudes en revisión: apiladas, como las tarjetas de orden ---- */
+  .revision-row { flex-wrap: wrap; }
+  .revision-row .order-main { min-width: 0; flex: 1 1 100%; order: 2; }
+  .revision-pill { order: 3; }
 }

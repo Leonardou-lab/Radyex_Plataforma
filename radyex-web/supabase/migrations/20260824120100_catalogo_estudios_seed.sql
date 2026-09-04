@@ -1,7 +1,8 @@
 -- =============================================================================
 -- RADYEX — Semilla del catálogo de estudios
 -- =============================================================================
--- PROPUESTA, NO APLICADA. Depende de 20260824120000_esquema_inicial.sql.
+-- APLICADA al proyecto remoto con `supabase db push`.
+-- Depende de 20260824120000_esquema_inicial.sql.
 --
 -- Esto NO es dato de pacientes: es el catálogo fijo de estudios/paquetes que
 -- hoy vive hardcodeado en `radyex-web/lib/data.ts` (STUDY_CATEGORIES,

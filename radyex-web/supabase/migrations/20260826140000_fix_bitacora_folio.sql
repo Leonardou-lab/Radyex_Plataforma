@@ -1,7 +1,8 @@
 -- =============================================================================
 -- RADYEX — Fix: registrar_bitacora_evento() truena en tablas sin `folio`
 -- =============================================================================
--- PROPUESTA, NO APLICADA. `20260824120000_esquema_inicial.sql` ya se corrió
+-- APLICADA al proyecto remoto con `supabase db push`.
+-- Contexto de por qué es una migración aparte: `20260824120000_esquema_inicial.sql` ya se corrió
 -- contra el proyecto remoto (supabase db push), así que este fix NO edita esa
 -- migración vieja — reemplaza la función con CREATE OR REPLACE, que sí se
 -- puede volver a aplicar sobre una base ya existente. No hace falta recrear

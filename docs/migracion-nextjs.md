@@ -144,19 +144,122 @@ lo muestra; (c) lo que depende de R2 o del alta con service-role va al final;
 
 ### Bloque 1 — Órdenes y pacientes (lectura, reusa el molde)
 
-1. **Órdenes (Radyex)** — lista de TODAS las órdenes. Gemela de `/ordenes`; la RLS
-   de equipo/admin ya trae todo (no filtres). Agrega columna/filtro por doctor. Solo
-   lectura en este paso.
-2. **Cambiar estatus de una orden** (Server Action) en esa misma pantalla. Primera
-   escritura (`UPDATE ordenes.estatus`, RLS equipo/admin). Dispara el trigger
-   `trg_bitacora_cambio_estatus` → empiezan a existir filas reales de bitácora. El
-   `/ordenes` del doctor lo refleja al instante (ya lee en vivo).
-3. **Nueva orden (Doctor)** — el formulario grande. Lee el catálogo (constantes de
-   `lib/data.ts`, ya sembrado idéntico en la BD) e **inserta `pacientes` + `ordenes`
-   + `orden_estudios`** en una Server Action. Autocontenido. A partir de aquí se
-   generan datos reales que fluyen a Órdenes (Radyex).
+1. **Órdenes (Radyex)** — lista de TODAS las órdenes. ✅ HECHO (2026-09-01):
+   `app/(radyex)/admin/ordenes/page.tsx`, gemela de `/ordenes`, misma consulta +
+   `mapearOrden`, RLS trae todo (sin filtrar a mano). `OrderList`/`OrderCard`
+   ganaron props opcionales (`titulo`, `subtitulo`, `mostrarNuevaOrden`,
+   `mostrarDoctor`) con default = vista Doctor; con `mostrarDoctor` la tarjeta
+   muestra el doctor referente en vez de la localidad y la búsqueda lo cubre. Solo
+   lectura.
+2. **Cambiar estatus de una orden.** ⏸️ POSPUESTO (decisión 2026-09-02). Ni el
+   mockup ni los docs tienen un control manual de estatus: la única transición del
+   prototipo (`→ Finalizado`) ocurre al subir un archivo desde `radyex/subir.html`
+   (`RADYEX.addFileToOrder(code, file, 'success')`), que es **Fase 5 (R2)**. Para no
+   inventar UI sin referencia, esta escritura se hace en la Fase 5 junto con "Subir
+   archivos", tal como el mockup. La edición manual de estatus (un control en el
+   modal de Órdenes Radyex, gated por rol) queda como posible feature aparte si
+   Monse la pide — no bloquea la Fase 4. El trigger `trg_bitacora_cambio_estatus`
+   ya está y escribirá la bitácora en cuanto haya un primer `UPDATE ordenes.estatus`.
+   Ver también "Ganchos de backend" abajo y `docs/PROGRESO.md`.
+3. **Nueva orden (Doctor)** — el formulario grande. **Primera ESCRITURA de la
+   Fase 4** (el paso 2 se pospuso). Se desvió a la mecánica **`solicitudes_orden`
+   (opción B2, decisión 2026-09-02)**: como un doctor no puede escribir en
+   `pacientes` (RLS), el formulario NO crea la orden — crea una **solicitud** que
+   Radyex revisa (crear/enlazar paciente) antes de materializar `ordenes` +
+   `orden_estudios`. Sub-pasos:
+   - **3.0** Migración `radyex-web/supabase/migrations/20260902120000_solicitudes_orden.sql`
+     (tabla + enum + RLS). ✅ **aplicada** (`db push`, 2026-09-02).
+   - **3.1** Función `public.aprobar_solicitud_orden()` (SECURITY DEFINER:
+     crear/enlazar paciente + generar folio + insertar `ordenes`/`orden_estudios`
+     + cerrar la solicitud; o rechazar). ✅ **CERRADO** — aplicada (`db push`,
+     2026-09-03) y **verificada en vivo** (2026-09-04, pruebas en transacciones
+     con rollback: rama paciente nuevo, candado de propiedad rebotando con RLS
+     42501, y dedup enlazando sin duplicar). Migración
+     `20260902130000_aprobar_solicitud_orden.sql`. Detalle en `docs/PROGRESO.md`.
+
+     **Contrato para el Server Action de 3.2** — hay UNA sola versión de la
+     función en la BD (confirmado vía `pg_proc`), así que la llamada es
+     determinística:
+     ```
+     supabase.rpc('aprobar_solicitud_orden', {
+       p_solicitud_id: uuid,
+       p_aprobar:      boolean,
+       p_paciente_id:  uuid | null,   // solo para dedup de Radyex
+       p_comentario:   text | null,
+     })
+     // retorna jsonb: { folio, estado, orden_id, paciente_id, solicitud_id }
+     ```
+     No confundir con `public.aprobar_solicitud` (sin `_orden`, 3 params), que
+     es la de altas de doctor / cambios sensibles.
+     **Folio decidido (2026-09-03, con Monse):** RADYEX genera su propio folio
+     **interno**, `OR-AAMMDD-NNNN` (p. ej. `OR-260903-0001`) — `'OR'` de
+     "orden", **no** es sede ni sucursal; `NNNN` = `nextval(public.folio_seq)`,
+     secuencia **global** (sin reinicio diario), `lpad` a 4 dígitos. Es
+     independiente del folio operativo del centro, que no se puede replicar
+     porque depende de datos externos al sistema (qué computadora se usó, folio
+     del ticket de pago). Los `LN`/`TM` del mockup quedan descartados: eran
+     datos ficticios sin significado.
+   - **3.2** Formulario del doctor (`app/(doctor)/nueva-orden/`). Partido en:
+     **3.2a** ✅ CSS del formulario portado a `app/radyex-ui.css` + `PAQUETES`
+     de `lib/data.ts` alineado con `paquete_estudios`.
+     **3.2b** ✅ panel de estudios (`lib/estudios-solicitud.ts` con la lógica
+     pura + `components/nueva-orden/`: `SeleccionEstudios`, `PaquetesRapidos`,
+     `CategoriaEstudios`, `PanelPeriapical`, `TomografiaFov`,
+     `BadgeEntregaFisica`).
+     **3.2c-1** ✅ página + `DatosDoctor` + `SelectorPaciente` +
+     `NuevaOrdenForm` + Server Action `crearSolicitudOrden()` + confirmación
+     sin folio.
+     **3.2c-2** ✅ sección "En revisión" en `/ordenes`
+     (`lib/mapeo-solicitudes.ts` + `components/ordenes/SolicitudesEnRevision.tsx`,
+     colgada de un slot genérico `encabezado` nuevo en `OrderList`;
+     `OrderCard`/`StatusPill` sin tocar).
+     **Paso 3.2 COMPLETO.**
+
+     **Dos reglas de mapeo obligatorias** (ver `docs/orden-de-estudio.md` §
+     "Reglas de mapeo formulario → base de datos"):
+     1. **El `value` de todo control de opción fija sale en el formato canónico
+        de la BD, no en el de display.** Ya corregido en el mockup (2026-09-03):
+        Periapical emite `'sensor'`/`'rx'` (la columna `tipo_captura` tiene
+        `check in ('sensor','rx')`), con los labels "Sensor"/"RX" intactos.
+        `entrega` sí va capitalizado (`'Impreso'`/`'Digital'`, enum
+        `tipo_entrega`); `fov` y `estudio_id` ya salían canónicos.
+     2. **Tomografía 3D no tiene un control de estudio propio en el form; se
+        infiere de la selección de FOV.** La Server Action **DEBE sintetizar** un
+        estudio `{ estudio_id: 'tomografia-3d', fov: <valor del radio>,
+        zona: <valor de #fovZona> }` cuando haya un FOV seleccionado, y agregarlo
+        al array de estudios de la solicitud. Sin esto, las órdenes de tomografía
+        se registran sin su `estudio_id` y la fila de `catalogo_estudios`
+        `'tomografia-3d'` nunca se usa.
+
+     **Dos decisiones de UX cerradas (2026-09-03)** — consecuencia de que el
+     doctor ya no crea la orden, sino una solicitud a revisión:
+     1. **La confirmación NO muestra folio.** El mockup termina en "Orden
+        enviada · Folio LN…", pero con la mecánica B2 el folio no existe hasta
+        que Radyex aprueba (lo genera `aprobar_solicitud_orden()`). El panel de
+        confirmación dice **"Solicitud enviada — Radyex la está revisando"**,
+        sin folio. Es un cambio obligado respecto al mockup, no una preferencia.
+     2. **`/ordenes` (vista Doctor) lleva una sección "En revisión"** que lee
+        las `solicitudes_orden` del doctor en estado `pendiente`. Sin esto el
+        doctor envía la solicitud y no la ve en ningún lado, porque `/ordenes`
+        consulta `ordenes` y una solicitud pendiente todavía no es una orden.
+        **Acotado a propósito:** va como sección aparte arriba de la lista, con
+        **componente propio** — NO se tocan `OrderCard` ni `StatusPill` ni se
+        agrega un 4º estado a `STATUS_MAP` (una solicitud no tiene folio ni
+        `iniciales`, no cabe en el molde `Orden`). Así el flujo queda
+        demostrable de punta a punta sin contaminar el camino de lectura ya
+        probado.
+   - **3.3** ✅ Pantalla de revisión de Radyex, `/admin/solicitudes`
+     (`app/(radyex)/admin/solicitudes/` + `components/solicitudes/`): cola de
+     pendientes (más viejas primero), modal de revisión con búsqueda de
+     deduplicación contra el expediente maestro, y aprobar/rechazar vía
+     `supabase.rpc('aprobar_solicitud_orden')`. **No** va detrás de
+     `exigirAdmin()` — revisar órdenes es trabajo del equipo Radyex. Ítem de
+     menú "Solicitudes" nuevo (no existía en el mockup).
+   Detalle en `docs/perfiles-y-acceso.md` § "Flujo … `solicitudes_orden`" y en
+   `docs/PROGRESO.md`.
 4. **Pacientes (Radyex)** — lista de todos los pacientes (ya poblada por el paso 3).
-   Solo lectura.
+   Solo lectura. (Encaja con el sub-paso 3.3 — la revisión de solicitudes vive del
+   lado de Radyex.)
 5. **Pacientes (Doctor)** — pacientes del doctor (RLS: solo los que tienen una orden
    suya). Mismos componentes que el paso 4, cambia el rol. La sección de archivos
    por año queda como placeholder (Fase 5).
@@ -172,6 +275,15 @@ lo muestra; (c) lo que depende de R2 o del alta con service-role va al final;
    `doctores.fecha_nacimiento`. Van tarde a propósito: sin órdenes reales no se ven.
 
 ### Bloque 3 — Admin-only (detrás del guard del paso 0.3)
+
+`exigirAdmin()` va SIEMPRE en un `layout.tsx` por subcarpeta
+(`app/(radyex)/admin/bitacora/layout.tsx`, `.../reportes/layout.tsx`,
+`.../doctores/layout.tsx`), NUNCA en `app/(radyex)/admin/layout.tsx`. `/admin/` es el
+namespace de URL del panel interno (equipo + admin), no una marca de "solo
+Administrador" — existe solo para no chocar con las rutas de la vista Doctor
+(`/ordenes`, `/pacientes`, `/inicio`). Sellar `admin/` entero dejaría fuera al equipo
+Radyex de Órdenes, Pacientes y Subir archivos. Por eso `/admin/ordenes` se queda donde
+está (es de equipo + admin), no se movió.
 
 8. **Bitácora (Admin)** — lee `public.bitacora`. Va DESPUÉS de los pasos 2 y 6 para
    que ya haya eventos reales. Solo lectura. Primera pantalla que usa el guard "solo
@@ -223,6 +335,14 @@ El front ya marca dónde va cada integración con `// TODO (backend)`:
 - Envío del **buzón "Dudas o sugerencias"** al correo personal de Monse (nunca a una
   tabla que el personal pueda consultar).
 - **Notificación de cumpleaños** de doctores al equipo admin.
+- **Cambio de estatus de una orden** (`UPDATE ordenes.estatus`) — POSPUESTO del
+  Bloque 1 · paso 2 (decisión 2026-09-02). El mockup solo lo hace como efecto de
+  subir un archivo (`radyex/subir.html` → orden a "Finalizado"); no hay control
+  manual en ninguna pantalla. Se implementa en la **Fase 5**, junto con "Subir
+  archivos". Si Monse llega a pedir edición manual de estatus, es una feature aparte
+  (control en el modal de Órdenes Radyex, gated por rol). El trigger
+  `trg_bitacora_cambio_estatus` ya escribe la bitácora solo en cuanto haya un
+  `UPDATE`.
 
 ---
 

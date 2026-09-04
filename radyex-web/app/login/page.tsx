@@ -54,7 +54,7 @@ export default async function LoginPage({
                   autoComplete="email"
                   required
                   placeholder="doctor@correo.com"
-                  className="pl-8"
+                  className="pl-9"
                 />
               </div>
             </div>
@@ -74,7 +74,7 @@ export default async function LoginPage({
                   autoComplete="current-password"
                   required
                   placeholder="••••••••"
-                  className="pl-8"
+                  className="pl-9"
                 />
               </div>
             </div>

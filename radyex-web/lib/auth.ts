@@ -85,6 +85,15 @@ export function etiquetaRol(rol: RolUsuario | null): string {
  *     await exigirAdmin();
  *     return <>{children}</>;
  *   }
+ *
+ * IMPORTANTE: `/admin/` es el namespace de URL del panel interno (equipo
+ * Radyex + Administrador), NO una marca de "solo Administrador" — existe
+ * solo para no chocar con las rutas de la vista Doctor (/ordenes,
+ * /pacientes, /inicio, que se repiten en las dos vistas). Por eso
+ * `exigirAdmin()` va SIEMPRE en un layout.tsx por subcarpeta
+ * (admin/bitacora/, admin/reportes/, admin/doctores/) y NUNCA en
+ * app/(radyex)/admin/layout.tsx: ahí sellaría también Órdenes, Pacientes
+ * y Subir archivos, que son de equipo + admin.
  */
 export async function exigirAdmin(): Promise<void> {
   const { rol } = await obtenerUsuarioConRol();

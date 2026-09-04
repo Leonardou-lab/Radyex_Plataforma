@@ -1,8 +1,9 @@
 -- =============================================================================
 -- RADYEX — Esquema inicial (fase 2 del roadmap)
 -- =============================================================================
--- PROPUESTA, NO APLICADA. Este archivo es para revisión. No se ha corrido
--- contra ningún proyecto de Supabase todavía.
+-- APLICADA al proyecto remoto con `supabase db push`. Es la base del esquema:
+-- NO se edita este archivo para cambiar algo ya aplicado — se agrega una
+-- migración nueva encima (como 20260826140000_fix_bitacora_folio.sql).
 --
 -- Fuente de verdad de las reglas que este esquema implementa:
 --   - docs/perfiles-y-acceso.md   (roles, aprobaciones, pacientes compartidos)

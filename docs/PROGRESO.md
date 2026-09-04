@@ -1,5 +1,5 @@
 # Estado del proyecto
-Última actualización: 2026-08-30
+Última actualización: 2026-09-04
 
 ## Hecho
 - Prototipo estático navegable (HTML/CSS/JS plano, sin framework aún) con `index.html` selector de rol.
@@ -387,11 +387,303 @@
     seed solo queda vivo el catálogo de estudios.
   - `npm run build`, `tsc --noEmit` y `eslint` limpios.
 
+- **Fase 4 · Bloque 1 · paso 1 — Órdenes (Radyex) migrada y conectada a
+  datos reales (2026-09-01).** SOLO LECTURA. Gemela de `/ordenes` (vista
+  Doctor): reusa el mismo patrón, los mismos componentes y el mismo mapeo.
+  - `app/(radyex)/admin/ordenes/page.tsx` (nuevo): Server Component `async`
+    con la MISMA consulta base que la vista Doctor (join a `pacientes`, a
+    `doctores → usuarios`, a `orden_estudios`/`catalogo_*`) y
+    `mapearOrden` de `lib/mapeo-ordenes.ts`. **No filtra por doctor**: la
+    RLS "admin y equipo ven todas las ordenes" ya devuelve todo. Orden por
+    `fecha_solicitud` desc. Iniciales del avatar = usuario en sesión
+    (mismo bloquecito que la vista Doctor).
+  - `components/ordenes/OrderList.tsx`: 4 props opcionales nuevas, todas
+    con default = comportamiento actual de la vista Doctor (así
+    `/ordenes` no cambió ni una línea de render): `titulo`, `subtitulo`,
+    `mostrarNuevaOrden` (default true; Radyex lo pasa `false`),
+    `mostrarDoctor` (default false; Radyex `true`). Con `mostrarDoctor`,
+    la búsqueda también matchea `doctorNombre` y el placeholder pasa a
+    "Buscar paciente, folio o doctor...".
+  - `components/ordenes/OrderCard.tsx`: prop opcional `mostrarDoctor`
+    (default false). Cuando es `true`, el primer dato de la tarjeta es el
+    doctor referente (ícono `Stethoscope` de Lucide) en lugar de la
+    localidad — igual que el mockup `radyex/ordenes.html`. Vista Doctor:
+    sin cambios (prop ausente → localidad, como siempre).
+  - **Fuera de alcance, explícito:** (a) cambiar el estatus de una orden
+    = paso 2 del Bloque 1 (primera escritura), NO va aquí; (b) archivos
+    del modal = placeholder Fase 5 - R2; (c) el botón "Subir archivo para
+    este paciente" del pie del modal en el mockup — no se añadió (requiere
+    tocar `PatientModal` para meterle un pie; va con "Subir archivos" /
+    Fase 5).
+  - Diferencia mínima de copy no portada: el `<p>` bajo la lista dice
+    "Toca cualquier paciente..." (compartido). En el mockup Radyex dice
+    "Toca cualquier orden...". Se deja así para no sumar otra prop; se
+    ajusta luego si molesta.
+  - Vista Doctor `/ordenes`: verificada sin cambios (no se tocó su
+    `page.tsx`; las props nuevas de `OrderList`/`OrderCard` son opcionales
+    con default = lo de antes). `npm run build`, `tsc --noEmit` y `eslint`
+    limpios; `/admin/ordenes` queda como ruta dinámica (`ƒ`).
+
+- **Fase 4 · Bloque 1 · paso 3 — desvío: mecánica `solicitudes_orden`
+  (opción B2), migración PROPUESTA (2026-09-02).** Un doctor no puede
+  escribir en `pacientes` (RLS), así que "Nueva orden" del doctor no crea la
+  orden directo: crea una **solicitud** que Radyex revisa (crear/enlazar
+  paciente) antes de materializar `ordenes` + `orden_estudios`. Ver
+  `docs/perfiles-y-acceso.md` § "Flujo … `solicitudes_orden`".
+  - `radyex-web/supabase/migrations/20260902120000_solicitudes_orden.sql`
+    (**APLICADO con `supabase db push` el 2026-09-02**): enum
+    `estado_solicitud_orden` (`pendiente|aprobada|rechazada`) + tabla
+    `public.solicitudes_orden` (`doctor_id`, `paciente_id` **o**
+    `paciente_datos jsonb`, `entrega`, `indicaciones`, `estudios jsonb`,
+    campos de revisión, `orden_id`) + constraints + índices + grants + RLS
+    (doctor ve/crea las suyas; equipo y admin ven todas y son los únicos que
+    hacen UPDATE = la revisión; sin DELETE). Endurecido en revisión: el
+    INSERT del doctor exige que un `paciente_id` no nulo sea de un paciente
+    con orden previa suya (patrón `exists` de
+    `esquema_inicial.sql:733-736`); `chk_estudios_es_array` exige array **no
+    vacío**.
+  - Decisiones tomadas en la migración: (a) TODA orden del doctor pasa por
+    `solicitudes_orden`, no solo las de paciente nuevo (cola de revisión
+    única para Radyex); (b) `estudios` como jsonb, no tabla hija (consistente
+    con `solicitudes_pendientes.datos_propuestos`); (c) sin folio en la
+    solicitud — se asigna al materializar la orden; (d) el doctor no edita
+    ni borra una solicitud enviada.
+
+- **Fase 4 · Bloque 1 · paso 3.1 — `aprobar_solicitud_orden()` VERIFICADA EN
+  VIVO (2026-09-04).** No solo aplicada: probada en el SQL Editor con las
+  pruebas **dentro de transacciones con rollback**, sin dejar datos de prueba
+  en la base. Sub-paso 3.1 **cerrado**.
+  - **Rama (c) paciente nuevo:** solicitud con `paciente_datos` y sin
+    `paciente_id` → la función creó el paciente desde cero, generó folio y
+    materializó `ordenes` + `orden_estudios` en una sola transacción.
+    Devolvió `folio: OR-260904-0001`, `estado: aprobada`. ✅
+  - **Candado de propiedad (INSERT):** un doctor intentó mandar una solicitud
+    con `paciente_id` directo a un paciente **sin orden previa suya** → rebotó
+    con **RLS 42501 en el INSERT mismo**, ni siquiera llega a la función.
+    Confirma viva la política endurecida de `solicitudes_orden`. ✅
+  - **Rama (b) dedup de Radyex:** solicitud que llega como "paciente nuevo"
+    (solo `paciente_datos`) pero que al aprobar Radyex enlaza pasando
+    `p_paciente_id` de un paciente existente → **enlazó al paciente real** (el
+    `paciente_id` devuelto es el del parámetro), **no creó duplicado**.
+    Devolvió `folio: OR-260904-0002`. ✅
+  - **Confirmaciones colaterales:**
+    - Folio nuevo funcionando en vivo: `OR-260904-0001`, `OR-260904-0002`. El
+      prefijo `LN` hardcodeado quedó **completamente eliminado**.
+    - `folio_seq` es global e incrementa entre aprobaciones **aunque haya
+      rollback** (`nextval` no se revierte). Los huecos en la numeración son
+      esperados y aceptados — el folio es un id único, no un conteo.
+    - `tipo_captura`: ambos valores (`sensor`, `rx`) entraron correctamente en
+      minúscula.
+    - **Función única confirmada vía `pg_proc`:** existe UNA sola versión,
+      firma `(uuid, boolean, uuid, text)` — 4 parámetros, `SECURITY DEFINER`.
+      No hay sobrecarga. La sospecha de una segunda versión de 3 params se
+      descartó: era **truncamiento visual del SQL Editor**. La función
+      homónima `aprobar_solicitud` (sin `_orden`, 3 params) es la de altas de
+      doctor / cambios sensibles — otra cosa, no se toca.
+  - **Firma real** (difiere del pseudocódigo original): 4 parámetros,
+    incluyendo `p_comentario text default null`. Retorna `jsonb` con
+    `{ folio, estado, orden_id, paciente_id, solicitud_id }`. El Server Action
+    de 3.2 la llamará por esta firma única vía `supabase.rpc()`.
+  - **Sin probar (aceptado):** el caso de **rechazo** (`p_aprobar = false`) no
+    se ejercitó — es la rama de menor riesgo (solo marca la solicitud como
+    `rechazada`, no crea nada). La **rama (a) directa** (solicitud con
+    `paciente_id` legítimo + orden previa) tampoco se probó de frente, pero su
+    candado inverso sí rebotó y la RLS de INSERT la cubre.
+
+- **Fase 4 · Bloque 1 · paso 3.2a — cimientos del formulario "Nueva orden"
+  (2026-09-03).** Groundwork antes de escribir la pantalla; sin UI nueva
+  todavía.
+  - `app/radyex-ui.css`: portadas del mockup las ~29 clases del formulario
+    que faltaban (había **0**): `.panel*`, `.field*` + inputs/textarea/select,
+    `.input-with-icon`, `.checkbox-row`, `.badge-entrega-fisica`,
+    `.radio-pill*`, `.package-*`, `.study-section/-grid/-subpanel`,
+    `.tooth-*` (carta dental FDI), `.fov-*`, `.combobox`/`.search-results`/
+    `.search-result-item`/`.selected-chip`/`.mini-avatar`, `.btn-ghost`,
+    `.btn-block`, `.dropzone-icon`. Mismos nombres de clase que
+    `assets/css/styles.css`; las familias tipográficas usan los tokens de
+    `globals.css` (`--font-display`/`--font-sans`) en vez de `'Lexend'`/
+    `'Inter'` literales. También el bloque responsive ≤640px (una columna,
+    objetivos táctiles ≥44px, y el `min-width:0` en `.study-grid > *` que
+    evita el overflow horizontal que ya se había corregido en el mockup).
+  - `lib/data.ts` (`PAQUETES`): alineado 1:1 con `paquete_estudios` de la BD
+    — se agregó `modelo-trabajo` a Ortodoncia y Diagnóstico, y
+    `modelo-estudio` + `modelo-trabajo` a Implantología (antes solo traía
+    `escaneo-intraoral`). Verificado por comparación automática de los tres
+    paquetes contra el seed SQL. Cierra un pendiente que arrastraba desde el
+    2026-08-26.
+  - `npm run build`, `tsc --noEmit` y `eslint` limpios.
+
+- **Fase 4 · Bloque 1 · paso 3.2b — panel de estudios del formulario
+  (2026-09-04).** La sección "Estudios que se solicitan", completa y
+  autocontenida. Todavía no hay página que la monte (eso es 3.2c).
+  - `lib/estudios-solicitud.ts` (nuevo): forma del estado
+    (`SeleccionEstudios`) + funciones **puras** compartidas entre el
+    formulario (cliente) y la Server Action (servidor):
+    `construirEstudiosSolicitud()` (arma el `estudios` jsonb),
+    `validarEstudios()`, `recalcularPaquetesActivos()`,
+    `etiquetasEntregaFisicaPaquete()`, `esEntregaFisica()`, `fovPideZona()`,
+    `resumirSeleccion()`. **Aquí se hacen cumplir las dos reglas de mapeo**:
+    valores canónicos (`tipoCaptura: 'sensor' | 'rx'`) y la **síntesis de
+    `{ estudio_id: 'tomografia-3d', fov, zona }`** desde el FOV elegido.
+  - `components/nueva-orden/` (nuevos, uno por archivo):
+    `SeleccionEstudios` (orquesta, componente **controlado** — sin estado
+    propio), `PaquetesRapidos`, `CategoriaEstudios`, `PanelPeriapical`
+    (Sensor/RX + carta dental FDI), `TomografiaFov`, `BadgeEntregaFisica`.
+    Todo dirigido por el catálogo de `lib/data.ts`: agregar un estudio no
+    obliga a tocar los componentes (Periapical y Cef "Otro" se reconocen por
+    sus flags `teeth`/`note`, no por id escrito a mano).
+  - **Portado el fix del bug de paquetes** (2026-08-26): un paquete solo se
+    prende con click explícito; `recalcularPaquetesActivos()` únicamente lo
+    puede **apagar**. Así marcar Ortodoncia no enciende Diagnóstico, aunque
+    sus estudios sean un subconjunto exacto.
+  - **Verificación:** 16 pruebas sobre las funciones puras (compiladas y
+    corridas en Node), todas en verde — síntesis de tomografía, zona solo
+    cuando el FOV la pide, `trim` de textos, `tipo_captura` en minúscula,
+    las 4 reglas de validación, el bug histórico de Ortodoncia→Diagnóstico,
+    apagado de paquete al destildar a mano, e Implantología exigiendo su FOV.
+  - `npm run build`, `tsc --noEmit` y `eslint` limpios.
+
+- **Fase 4 · Bloque 1 · paso 3.2c-1 — pantalla "Nueva orden" funcionando
+  (2026-09-04).** El doctor ya puede enviar una solicitud de punta a punta.
+  Ruta `/nueva-orden` viva (dinámica, `ƒ`).
+  - `app/(doctor)/nueva-orden/page.tsx` (nuevo): Server Component `async` que
+    trae el perfil del doctor (nombre/correo de `usuarios` + teléfono de
+    `doctores`, dos lecturas porque viven en tablas distintas) y **sus**
+    pacientes ya referidos — sin filtrar a mano: la RLS "un doctor ve solo
+    pacientes con orden suya" ya los acota.
+  - `app/(doctor)/nueva-orden/actions.ts` (nuevo): Server Action
+    `crearSolicitudOrden()` → `insert` en `solicitudes_orden`. Recibe un
+    **objeto plano** en vez de `FormData` (la selección de estudios es
+    anidada). Revalida TODO en el servidor (paciente, entrega, estudios) —
+    la validación del cliente es UX, no defensa. Traduce el error `42501`
+    (RLS) a un mensaje entendible sin filtrar qué expedientes existen.
+    `revalidatePath('/ordenes')` al terminar.
+  - `components/nueva-orden/` (nuevos): `NuevaOrdenForm` (dueño de todo el
+    estado; los paneles son controlados), `DatosDoctor`, `SelectorPaciente`.
+  - **Confirmación SIN folio**, según lo acordado: "Solicitud enviada —
+    Radyex la está revisando", explicando que la orden aparecerá en "Mis
+    órdenes" con su folio cuando la procesen.
+  - **Decisión: el perfil del doctor va de SOLO LECTURA** (el mockup lo tenía
+    como inputs editables). Nombre/email/WhatsApp no tienen columna en
+    `ordenes` — el dueño es `ordenes.doctor_id` — así que dejarlos editables
+    sugeriría que el doctor puede mandar la orden a nombre de otro o corregir
+    su perfil ahí, y ninguna de las dos cosas pasa. Editable solo lo que sí
+    se guarda: `indicaciones` y `entrega`. Clase nueva `.dato-solo-lectura`
+    en `radyex-ui.css`.
+  - La nota de paquete (guía quirúrgica de Implantología) se agrega/quita de
+    "Indicaciones" desde el formulario, igual que el mockup.
+
+- **Fase 4 · Bloque 1 · paso 3.2c-2 — sección "En revisión" en
+  `/ordenes` (2026-09-04).** Cierra el hueco: el doctor manda una solicitud y
+  ahora sí la ve, mientras Radyex la procesa.
+  - `lib/mapeo-solicitudes.ts` (nuevo): `mapearSolicitud()` + `FilaSolicitudDB`,
+    mismo patrón que `mapeo-ordenes.ts`. **Molde aparte de `Orden`** a
+    propósito: una solicitud pendiente no tiene folio (nace al aprobarla) ni
+    estatus de orden ni archivos. El nombre del paciente sale de dos lugares
+    según el caso — del join a `pacientes` si el doctor eligió uno ya
+    referido, o de `paciente_datos` si es nuevo para él.
+  - `components/ordenes/SolicitudesEnRevision.tsx` (nuevo): Server Component
+    (no tiene interacción). Reusa `.order-avatar/-main/-name/-meta`, con dos
+    clases nuevas mínimas (`.revision-row`, `.revision-pill`). **No es
+    clicable**: todavía no hay detalle que abrir. Marca "Paciente nuevo"
+    cuando aplica, para explicar por qué esa revisión puede tardar más. Si no
+    hay solicitudes pendientes, la sección entera no se dibuja.
+  - `components/ordenes/OrderList.tsx`: prop opcional nueva `encabezado?:
+    React.ReactNode`, un **slot genérico** que se dibuja entre los stats y el
+    buscador. OrderList no sabe qué le meten, así que no queda acoplado a las
+    solicitudes; `/admin/ordenes` simplemente no lo pasa y no cambia en nada.
+  - `app/(doctor)/ordenes/page.tsx`: segunda consulta a `solicitudes_orden`
+    con `.eq('estado','pendiente')` — ese filtro es **regla de negocio**, no
+    control de acceso: de que solo salgan las suyas se encarga la RLS.
+  - **`OrderCard` y `StatusPill` NO se tocaron** (verificado con `git diff`),
+    ni se agregó un cuarto estado a `STATUS_MAP` — tal como se acordó.
+  - `npm run build`, `tsc --noEmit` y `eslint` limpios.
+
+- **Fase 4 · Bloque 1 · paso 3.3 — pantalla de revisión de Radyex
+  (2026-09-04).** Cierra el circuito completo: ya se puede aprobar o rechazar
+  una solicitud **desde la app**, sin SQL Editor. Ruta `/admin/solicitudes`.
+  - **Es la única pantalla de la Fase 4 que NO viene del mockup**: nació con
+    la mecánica `solicitudes_orden` (decisión B2), que no existía cuando se
+    diseñó el prototipo. Ítem de menú nuevo "Solicitudes" (ícono `Inbox`),
+    puesto ANTES de "Órdenes" porque es la bandeja de entrada del flujo.
+  - **No va detrás de `exigirAdmin()`**: revisar órdenes es trabajo del
+    equipo Radyex (`docs/perfiles-y-acceso.md` § roles), y la RLS de UPDATE
+    de `solicitudes_orden` también deja pasar a equipo + admin.
+  - `app/(radyex)/admin/solicitudes/page.tsx` (nuevo): cola de pendientes,
+    **más viejas primero** (`ascending: true`) — es una cola de trabajo, se
+    atiende por orden de llegada, al revés que las listas de órdenes.
+  - `app/(radyex)/admin/solicitudes/actions.ts` (nuevo): `aprobarSolicitud()`
+    y `rechazarSolicitud()` llaman `supabase.rpc('aprobar_solicitud_orden')`
+    con la firma única de 4 params; `buscarPacientes()` hace la búsqueda de
+    deduplicación con `ilike` sobre el expediente maestro (mínimo 3 letras).
+    Una resolución revalida **tres** rutas: `/admin/solicitudes`,
+    `/admin/ordenes` y `/ordenes` del doctor.
+  - `components/solicitudes/` (nuevos): `ListaSolicitudes` (cola + estado del
+    modal + `router.refresh()` al resolver) y `RevisionModal`.
+  - **La deduplicación es el corazón de la pantalla:** cuando el doctor mandó
+    un "paciente nuevo", el modal busca coincidencias en el expediente
+    maestro (precargando el nombre tecleado) y el equipo decide **enlazar** a
+    uno existente o **crear** uno nuevo. El botón de aprobar cambia de texto
+    según el caso ("Enlazar y aprobar" / "Crear paciente y aprobar" /
+    "Aprobar"), para que la consecuencia sea explícita antes de tocarlo.
+    Quien crea o enlaza NO es la app: es `aprobar_solicitud_orden()`, en una
+    sola transacción.
+  - **Rechazar exige comentario** (validado en el cliente): un rechazo sin
+    motivo no le sirve a nadie después.
+  - `lib/mapeo-solicitudes.ts`: molde nuevo `SolicitudParaRevision` +
+    `mapearSolicitudRevision()` — Radyex necesita más que el doctor (quién la
+    pidió, indicaciones, datos crudos del paciente y desglose completo de
+    estudios). `lib/estudios-solicitud.ts`: `detallarEstudiosSolicitud()`,
+    que expande cada estudio con su detalle (Sensor/RX, dientes, FOV, zona,
+    técnica libre).
+  - Corregido en revisión un `setState` síncrono dentro de un `useEffect` que
+    ESLint marcó (renders en cascada): el "Buscando…" ahora se enciende
+    dentro del timeout del debounce — de paso ya no parpadea con cada tecla.
+  - `npm run build`, `tsc --noEmit` y `eslint` (proyecto completo) limpios.
+
 ## En curso
-- Nada activo identificado en el repo. Sigue la Fase 4 (migrar el resto de
-  pantallas) — ver "Pendiente".
+- **Fase 4 · Bloque 1 · pasos 3.2 y 3.3 completos.** El circuito de "Nueva
+  orden" ya cierra de punta a punta en la app: el doctor la envía → la ve
+  "En revisión" → Radyex la revisa, deduplica y aprueba → nace la orden con
+  su folio y aparece en las dos listas de órdenes.
+  - **Probado en navegador:** 3.2c-1 (prueba de humo del usuario, 2026-09-04).
+  - **Sin probar en navegador:** 3.2c-2 y todo 3.3. Falta el recorrido
+    completo con dos usuarios reales (doctor y equipo Radyex), incluyendo
+    los tres caminos del modal: enlazar a existente, crear nuevo, y
+    **rechazar** — esta última es la rama de `aprobar_solicitud_orden()` que
+    sigue sin ejercitarse nunca (ver "Pendiente").
+  - Siguen los pasos 4 y 5 del Bloque 1: **Pacientes (Radyex)** y
+    **Pacientes (Doctor)**.
+  Dos decisiones de UX cerradas: confirmación **sin folio** y sección
+  "En revisión" en `/ordenes` con componente propio — detalle en
+  `docs/migracion-nextjs.md` sub-paso 3.2.
 
 ## Pendiente
+- **Mecánica `solicitudes_orden` (opción B2) — completar:**
+  1. ~~**`public.aprobar_solicitud_orden(...)`**~~ — ✅ **APLICADA Y
+     VERIFICADA EN VIVO** (2026-09-03 / 2026-09-04). Sub-paso 3.1 **cerrado**;
+     detalle de las 3 pruebas en "Hecho". Firma única de 4 params
+     `(uuid, boolean, uuid, text)`, retorna `jsonb`.
+     **El backend de la mecánica B2 queda COMPLETO** — falta solo la UI
+     (puntos 2 y 3).
+  2. **Formulario "Nueva orden" del doctor** (`app/(doctor)/nueva-orden/`):
+     buscar paciente ya referido **o** teclear uno nuevo; secciones de
+     estudios + subpaneles (Periapical Sensor/RX + dientes FDI, Cef "Otro",
+     Tomografía FOV + zona); paquetes; badges de entrega física; validación
+     en cliente; Server Action que hace `insert` en `solicitudes_orden`.
+     Portar el CSS del formulario desde `assets/css/styles.css` a
+     `app/radyex-ui.css` (hoy no está ninguna clase del form).
+  3. **Pantalla de revisión de Radyex**: cola de `solicitudes_orden`
+     `pendiente`; ver `paciente_datos`, buscar en `pacientes`, enlazar/crear,
+     aprobar (llama `aprobar_solicitud_orden()`) o rechazar.
+  4. **Marcar la orden como "en revisión" en "Mis órdenes" del doctor** —
+     va con el trabajo de estatus de orden (también pendiente). Hoy el doctor
+     no verá la solicitud en `/ordenes` hasta que se apruebe (esa pantalla
+     lee `ordenes`, no `solicitudes_orden`).
+  5. ~~**`PAQUETES` en `radyex-web/lib/data.ts`** desalineado con
+     `paquete_estudios`~~ — ✅ **corregido (2026-09-03)**, ver "Hecho".
+     Queda desalineado solo el mockup (`assets/js/common.js`), que ya no
+     alimenta la app real.
 - **Prueba formal de rebote por rol del doctor:** la protección de rutas ya
   quedó verificada con una sesión de Equipo Radyex/Admin (`/ordenes` rebota
   a `/sin-acceso`), pero falta repetir la prueba con un usuario `doctor`
@@ -411,6 +703,17 @@
   bitácora/doctores/reportes, agregar ahí el chequeo "solo Administrador"
   (ver nota en "Hecho", entrada del 2026-08-28) — el layout general de la
   zona hoy solo exige admin o equipo_radyex.
+- **Cambio de estatus de una orden (`UPDATE ordenes.estatus`) — POSPUESTO
+  del Bloque 1 · paso 2 (decisión 2026-09-02).** Ni el mockup ni los docs
+  tienen un control manual de estatus; la única transición del prototipo
+  (`→ Finalizado`) ocurre al subir un archivo (`radyex/subir.html`,
+  `RADYEX.addFileToOrder(code, file, 'success')`), que es Fase 5 (R2). Se
+  construye ahí, junto con "Subir archivos", como en el mockup — así la
+  primera ESCRITURA de la Fase 4 pasa a ser "Nueva orden" (paso 3), que sí
+  está 100% especificada. La edición manual de estatus (control en el modal
+  de Órdenes Radyex, por rol) queda como posible feature aparte si Monse la
+  pide; no bloquea la Fase 4. El trigger `trg_bitacora_cambio_estatus` ya
+  existe y escribirá la bitácora en cuanto haya un primer `UPDATE`.
 - **Fase 4 de la migración a Next.js: migrar el resto de pantallas**, una por una, usando "Mis órdenes" (`components/ordenes/` + `app/(doctor)/ordenes/page.tsx` + `app/(doctor)/ordenes/mapeo.ts`) como patrón (ver `docs/migracion-nextjs.md`). El molde ya incluye la conexión a Supabase: página Server Component `async` que consulta con el cliente de `lib/server.ts` y traduce con un `mapeo.ts` propio (función pura `mapearOrden`); confiar en la RLS, no filtrar por rol en el código. Orden sugerido: nueva orden + lista → subir archivo → ver/descargar archivos → módulo admin (usuarios, bitácora, reportes) → buzón. Cada pantalla nueva extiende `app/radyex-ui.css` con las clases que le falten (hoy solo trae lo que usa el layout compartido y "Mis órdenes").
 - **Notificación de cumpleaños de doctores al equipo admin** (requiere backend — job programado o trigger de Supabase que revise `birthDate` y notifique al equipo; el frontend ya guarda el dato y tiene el TODO marcado en `radyex/doctores.html`).
 - Integración real con Supabase (datos y auth) y Cloudflare R2 (almacenamiento de PDFs/imágenes).
@@ -438,6 +741,11 @@
   - Las URLs de la vista Radyex viven bajo `/admin/*` (no `/radyex/*`) mientras que la vista Doctor usa rutas limpias sin prefijo (`/ordenes`, `/inicio`...): las dos vistas repiten nombres de pantalla ("inicio", "ordenes", "pacientes"), y como los route groups de Next.js (`(doctor)`, `(radyex)`) no agregan segmento a la URL, hacía falta un prefijo real para no chocar. Se eligió que el panel interno sea el que lleva el prefijo (`/admin`) porque el doctor es la cara pública del producto.
   - Las clases del sistema de diseño (`app/radyex-ui.css`) se portaron casi literal de `assets/css/styles.css` (mismos nombres de clase: `.sidebar`, `.order-card`, `.modal-overlay`...) en vez de reescribir todo como utilidades de Tailwind sueltas: ese CSS ya estaba probado a 390px en el mockup, y reusarlo evita repetir a mano decenas de reglas de los tres breakpoints (880px / 640px / 480px) con alto riesgo de que algo quede ligeramente distinto. Tailwind sí se usa para los tokens de color/tipografía (`@theme` en `app/globals.css`) y para utilidades sueltas dentro de los componentes nuevos.
   - Se reprodujo el flujo de "ver archivo" del mockup (visor de PDF en un modal encima del modal de paciente) tal cual, en vez de simplificarlo, porque es parte del comportamiento visible de "Mis órdenes" que la fase 1 tenía que igualar.
+- **Fase 4 · Bloque 1 · paso 2 pospuesto (2026-09-02):** el "cambio de estatus de una orden" no se hace como pantalla/control aparte. El mockup solo cambia el estatus como efecto de subir un archivo (`radyex/subir.html`), así que esa escritura se hace en la Fase 5 (R2) junto con "Subir archivos", tal como el mockup. La primera ESCRITURA de la Fase 4 pasa a ser "Nueva orden" (paso 3). Edición manual de estatus = feature aparte solo si Monse la pide. Detalle en "Pendiente" arriba y en `docs/migracion-nextjs.md` (Bloque 1 · paso 2 + "Ganchos de backend").
+- **Folio de orden — RADYEX genera su propio folio interno `OR-AAMMDD-NNNN` (2026-09-03, confirmado con Monse).** Dos hallazgos encadenados:
+  1. Se investigó (git + docs + `docs/orden-de-estudio.md`, la transcripción del papel real) y `LN`/`TM` no estaban definidos en ningún lado — nacieron hardcodeados en `SEED_ORDERS` de `assets/js/common.js` y en `generateFolio()`, que elegía el prefijo **al azar**. Datos ficticios del mockup, sin significado. **Descartados por completo.**
+  2. Monse aclaró que el folio operativo del centro **no se puede replicar**: depende de datos que este sistema no tiene (en qué computadora se capturó el estudio, folio del ticket de pago).
+  **Decisión:** el folio de la plataforma es un identificador **interno de RADYEX**, independiente del folio operativo del centro. Formato `OR-AAMMDD-NNNN` (p. ej. `OR-260903-0001`): `'OR'` de "orden" — **no** es sede, sucursal ni tipo de estudio; `AAMMDD` = fecha de aprobación en `America/Mexico_City`; `NNNN` = `nextval('public.folio_seq')` con `lpad` a 4 dígitos. La secuencia es **global**, sin reinicio diario: el folio es un id único, no un conteo diario, y un contador global no necesita consultar "el último del día" (no es frágil bajo concurrencia). Verificado que `OR` no choca con ninguna otra serie del esquema. Implementado en `aprobar_solicitud_orden()`. Deja de ser un "pendiente con Monse".
 
 ## Pendientes de resolver con Monse
 - ~~Confirmar aprobación del mockup estático~~ **Resuelto 2026-08-24: aprobado.**

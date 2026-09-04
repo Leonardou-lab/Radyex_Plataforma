@@ -1,10 +1,11 @@
 # RADYEX — Roadmap
 
-Estado a la fecha: **mockup aprobado por Monse (2026-08-24)** y **fase 1 de la
-migración a Next.js completa** (fundaciones + "Mis órdenes" como pantalla de
-referencia, ver `docs/PROGRESO.md`). Monse también respondió las preguntas de
-perfiles y accesos — decisiones cerradas en `docs/perfiles-y-acceso.md`. Lo que sigue
-es el modelo de datos y el backend real (fases 2-6 abajo).
+Estado a la fecha (2026-09-03): **mockup aprobado por Monse (2026-08-24)**;
+**fases 1, 2 y 3 completas** (fundaciones, esquema aplicado en Supabase, auth +
+RLS + rutas por rol); **fase 4 en curso** — ya migradas y leyendo datos reales
+`/ordenes` (vista Doctor) y `/admin/ordenes` (vista Radyex). Ver
+`docs/PROGRESO.md`. Monse también respondió las preguntas de perfiles y accesos
+— decisiones cerradas en `docs/perfiles-y-acceso.md`.
 
 Ver detalle del estado en `docs/PROGRESO.md`, de la migración en
 `docs/migracion-nextjs.md`, y del modelo de acceso en `docs/perfiles-y-acceso.md`.
@@ -71,10 +72,24 @@ desde el esquema (fase 2): cada doctor solo ve sus pacientes/órdenes; el
 equipo Radyex no ve la bitácora legal completa; solo el Administrador sí
 — reglas exactas en `docs/perfiles-y-acceso.md`.
 
-**Fase 4 — Migrar el resto de pantallas. SIGUIENTE.**
+**Fase 4 — Migrar el resto de pantallas. EN CURSO (desde 2026-08-31).**
 Convertir cada pantalla aprobada a componentes conectados a datos reales, con "Mis
-órdenes" como patrón. Orden: login/registro → nueva orden + lista → subir archivo →
-ver/descargar → módulo admin (usuarios, bitácora, reportes) → buzón.
+órdenes" como patrón. El orden por bloques, el patrón exacto y los errores de
+secuencia que hacen tropezar están en `docs/migracion-nextjs.md` § "Fase 4 — Orden
+de migración". Hecho hasta ahora: cimientos (Bloque 0) y **Órdenes (Radyex)**.
+Siguiente: el formulario de **Nueva orden** del doctor.
+
+Desvío importante de esta fase (2026-09-02/03): como un doctor **no puede escribir
+en `pacientes`** (RLS), "Nueva orden" no crea la orden — crea una **solicitud** en
+`public.solicitudes_orden` que el equipo Radyex revisa (crea o enlaza el paciente)
+antes de materializar `ordenes` + `orden_estudios` vía
+`public.aprobar_solicitud_orden()`. Ambas piezas de backend ya están aplicadas en
+Supabase; falta la UI (formulario del doctor + pantalla de revisión de Radyex). Ver
+`docs/perfiles-y-acceso.md` § "Flujo … `solicitudes_orden`".
+
+Ahí también se decidió el **folio**: RADYEX genera el suyo interno,
+`OR-AAMMDD-NNNN`, independiente del folio operativo del centro (que depende de datos
+externos al sistema y no se puede replicar).
 
 **Fase 5 — Archivos en R2.**
 Subida asociada a paciente/doctor/orden; descargas con URLs firmadas temporales. Aquí

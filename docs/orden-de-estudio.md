@@ -113,11 +113,20 @@ quiera, no al revés. Esto precisa qué significa "cefalometría", "fotografías
   en Indicaciones, no es un estudio marcable), Modelos **Estudio y Trabajo** (ambos),
   Escaneo intraoral.
 
-Implementación de referencia (esquema): `radyex-web/supabase/migrations/20260824120100_catalogo_estudios_seed.sql`,
-tabla `paquete_estudios`. **Pendiente:** el mockup (`assets/js/common.js`) y
-`radyex-web/lib/data.ts` (`PAQUETES`) todavía no reflejan este contenido completo —
-hoy marcan de menos (falta "Trabajo" en Ortodoncia/Diagnóstico, y falta Modelos por
-completo en Implantología). Actualizar cuando se retome el front de "nueva orden".
+Fuente de verdad (esquema): `radyex-web/supabase/migrations/20260824120100_catalogo_estudios_seed.sql`,
+tabla `paquete_estudios`.
+
+- ✅ `radyex-web/lib/data.ts` (`PAQUETES`) **ya está alineado 1:1** con esa tabla
+  (2026-09-03, al arrancar el sub-paso 3.2 de la migración): se agregó "Trabajo"
+  (modelos) a Ortodoncia y Diagnóstico, y "Estudio" + "Trabajo" a Implantología.
+  Verificado por comparación automática de los tres paquetes.
+- ⏳ El mockup (`assets/js/common.js`) **sigue desalineado** — marca de menos. Es
+  referencia congelada y ya no alimenta la app real, así que se corrige solo si se
+  vuelve a usar el prototipo estático para demo.
+
+Nota: la Tomografía 3D de Implantología no aparece en `items` ni en
+`paquete_estudios` a propósito — no es un estudio de checkbox, se marca fijando el
+FOV (`PAQUETES[].fov = '12x9'`).
 
 ---
 
@@ -155,6 +164,55 @@ Implementación de referencia (mockup): `assets/js/common.js` — cada ítem del
 física que no son un estudio marcable. `doctor/nueva-orden.html` lee esos flags para
 pintar el badge — no está codificado a mano por pantalla. Mismos flags portados en
 `radyex-web/lib/data.ts` para cuando se migre esta pantalla (fase 4).
+
+---
+
+## Reglas de mapeo formulario → base de datos
+
+Reglas que el formulario ya cumple y que la migración a Next.js (sub-paso 3.2 de
+`docs/migracion-nextjs.md`) tiene que respetar.
+
+### 1. El `value` de un control de opción fija sale en el formato canónico de la BD
+
+**El `value` de todo control de opción fija (radio, checkbox, select) se emite en el
+formato canónico de la columna destino, nunca en el formato de display.** La etiqueta
+que ve el doctor se mantiene como esté; lo que cambia es solo el valor que viaja.
+
+Origen (2026-09-03): los radios de Periapical emitían `value="Sensor"` / `value="RX"`,
+pero `orden_estudios.tipo_captura` tiene `check (tipo_captura in ('sensor','rx'))` en
+minúscula — un insert con `'RX'` habría reventado el check. Se corrigió en
+`doctor/nueva-orden.html` (`value="sensor"` / `value="rx"`, labels "Sensor" / "RX"
+intactos), junto con los tres sitios de JS que comparaban contra el valor viejo
+(el badge de "Entrega física" y el resaltado de los pills).
+
+Formatos canónicos vigentes de los controles de este formulario:
+
+| Control | Columna destino | Formato canónico |
+|---|---|---|
+| Entrega (Impreso / Digital) | `ordenes.entrega` | enum `tipo_entrega`: `'Impreso'`, `'Digital'` (**sí van capitalizados**) |
+| Periapical Sensor / RX | `orden_estudios.tipo_captura` | `'sensor'`, `'rx'` (minúscula) |
+| FOV de Tomografía 3D | `orden_estudios.fov` | `catalogo_fov.value`: `'16x9'`, `'12x9'`, `'8x9'`, `'8x5'`, `'5x5'` |
+| Checkbox de estudio | `orden_estudios.estudio_id` | `catalogo_estudios.id`: `'periapical'`, `'panoramica'`, … |
+
+Campos de texto libre (`zona`, `nota_libre`, `indicaciones`) no tienen formato
+canónico: van tal cual los escribe el doctor.
+
+### 2. Tomografía 3D: la Server Action debe sintetizar el estudio
+
+La tomografía 3D **no tiene un control de estudio propio en el formulario**; se infiere
+de la selección de FOV. La Server Action de 3.2 **DEBE sintetizar** un estudio
+`{ estudio_id: 'tomografia-3d', fov: <valor del radio>, zona: <valor de #fovZona> }`
+cuando haya un FOV seleccionado, y agregarlo al array de estudios de la solicitud. Sin
+esto, las órdenes de tomografía se registran sin su `estudio_id` y la fila de
+`catalogo_estudios` `'tomografia-3d'` nunca se usa.
+
+Contexto: el resto de las categorías se pintan como checkboxes desde
+`STUDY_CATEGORIES`, y cada uno emite su `estudio_id`. Tomografía 3D se pinta aparte,
+como tarjetas de FOV (radios `name="fov"`), y al enviar el mockup solo produce la
+etiqueta de display `"Tomografía 3D — 12 × 9"` — que no es un id de catálogo. La fila
+`'tomografia-3d'` sí existe en la BD (con `requiere_fov = true`), y el trigger
+`validar_orden_estudio()` exige el `fov` cuando ese estudio se inserta, además de la
+`zona` cuando el FOV es `5x5` (`catalogo_fov.requiere_zona`).
 
 ---
 

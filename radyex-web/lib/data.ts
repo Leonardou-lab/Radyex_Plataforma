@@ -318,26 +318,41 @@ export type Paquete = {
   entregaFisicaExtra?: string[];
 };
 
-// Paquetes de selección rápida: marcan automáticamente los
-// estudios que los componen en el formulario de nueva orden.
+// Paquetes de selección rápida: marcan automáticamente los estudios que los
+// componen en el formulario de nueva orden.
+//
+// `items` está alineado 1:1 con la tabla `paquete_estudios` de la BD
+// (20260824120100_catalogo_estudios_seed.sql) — esa es la fuente de verdad.
+// Cada paquete pre-marca su contenido COMPLETO y el doctor desmarca lo que no
+// quiera, no al revés (confirmado con Monse 2026-08-26; ver
+// docs/orden-de-estudio.md § "Contenido exacto pre-marcado por paquete").
 export const PAQUETES: Paquete[] = [
   {
     id: "ortodoncia",
     label: "Ortodoncia",
     desc: "Panorámica + lateral de cráneo + cefalometría + fotografías + modelos",
-    items: ["panoramica", "lateral-craneo", "cef-ricketts", "foto-digital", "modelo-estudio"],
+    items: [
+      "panoramica",
+      "lateral-craneo",
+      "cef-ricketts",
+      "foto-digital",
+      "modelo-estudio",
+      "modelo-trabajo",
+    ],
   },
   {
     id: "diagnostico",
     label: "Diagnóstico",
     desc: "Panorámica + fotografías + modelos",
-    items: ["panoramica", "foto-digital", "modelo-estudio"],
+    items: ["panoramica", "foto-digital", "modelo-estudio", "modelo-trabajo"],
   },
   {
     id: "implantologia",
     label: "Implantología",
     desc: "Tomografía + guía quirúrgica (diseño e impresión) + modelos + escaneos 3D",
-    items: ["escaneo-intraoral"],
+    // La tomografía no va en `items`: no es un checkbox del catálogo, se marca
+    // fijando el FOV de abajo (por eso `paquete_estudios` tampoco la incluye).
+    items: ["modelo-estudio", "modelo-trabajo", "escaneo-intraoral"],
     fov: "12x9",
     nota: "Incluye diseño e impresión de guía quirúrgica (lo coordina Radyex).",
     entregaFisicaExtra: ["Guía quirúrgica"],

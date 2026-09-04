@@ -8,10 +8,29 @@ import { OrderCard } from "./OrderCard";
 import { PatientModal } from "./PatientModal";
 
 type OrderListProps = {
-  /** Órdenes del doctor en sesión (ya filtradas por doctor en la página). */
+  /** Órdenes a mostrar (ya acotadas por la RLS en la página). */
   orders: Orden[];
-  /** Iniciales del doctor en sesión, para el avatar del topbar. */
+  /** Iniciales del usuario en sesión, para el avatar del topbar. */
   doctorIniciales: string;
+  /** Título del topbar. Default: el de la vista Doctor ("Mis órdenes"). */
+  titulo?: string;
+  /** Subtítulo del topbar. Default: el de la vista Doctor. */
+  subtitulo?: string;
+  /** Muestra el botón "Nueva orden" del topbar. Solo vista Doctor. Default: true. */
+  mostrarNuevaOrden?: boolean;
+  /**
+   * Vista Radyex: muestra el doctor referente en cada tarjeta y deja
+   * buscar por su nombre. Default: false (vista Doctor, sin cambios).
+   */
+  mostrarDoctor?: boolean;
+  /**
+   * Bloque opcional que se dibuja entre las tarjetas de resumen y el
+   * buscador. Hoy lo usa la vista Doctor para la sección "En revisión"
+   * (solicitudes que Radyex aún no procesa). Es un slot genérico a
+   * propósito: OrderList no sabe qué le meten, así que no queda acoplado a
+   * las solicitudes y la vista Radyex simplemente no lo pasa.
+   */
+  encabezado?: React.ReactNode;
 };
 
 // Filtros de estatus del toolbar. "todos" no es un EstatusOrden real,
@@ -42,7 +61,15 @@ const FILTROS: { key: Filtro; label: string; color?: string }[] = [
  * recalcula solo con cada tecleo o click en un chip — no hace falta
  * un event listener manual como en el mockup (`input.addEventListener`).
  */
-export function OrderList({ orders, doctorIniciales }: OrderListProps) {
+export function OrderList({
+  orders,
+  doctorIniciales,
+  titulo = "Mis órdenes",
+  subtitulo = "Consulta y da seguimiento a los estudios de tus pacientes",
+  mostrarNuevaOrden = true,
+  mostrarDoctor = false,
+  encabezado,
+}: OrderListProps) {
   const [busqueda, setBusqueda] = useState("");
   const [filtroActivo, setFiltroActivo] = useState<Filtro>("todos");
   const [ordenAbierta, setOrdenAbierta] = useState<Orden | null>(null);
@@ -58,21 +85,26 @@ export function OrderList({ orders, doctorIniciales }: OrderListProps) {
     .filter((o) => filtroActivo === "todos" || o.estatus === filtroActivo)
     .filter((o) => {
       const q = busqueda.trim().toLowerCase();
-      return o.nombrePaciente.toLowerCase().includes(q) || o.folio.toLowerCase().includes(q);
+      const coincideBase =
+        o.nombrePaciente.toLowerCase().includes(q) || o.folio.toLowerCase().includes(q);
+      // Vista Radyex: además, buscar por nombre del doctor referente.
+      return coincideBase || (mostrarDoctor && (o.doctorNombre ?? "").toLowerCase().includes(q));
     });
 
   return (
     <>
       <div className="topbar">
         <div>
-          <div className="page-title">Mis órdenes</div>
-          <div className="page-sub">Consulta y da seguimiento a los estudios de tus pacientes</div>
+          <div className="page-title">{titulo}</div>
+          <div className="page-sub">{subtitulo}</div>
         </div>
         <div className="topbar-actions">
-          <Link className="btn-primary" href="/nueva-orden">
-            <Plus size={16} strokeWidth={2.2} />
-            Nueva orden
-          </Link>
+          {mostrarNuevaOrden && (
+            <Link className="btn-primary" href="/nueva-orden">
+              <Plus size={16} strokeWidth={2.2} />
+              Nueva orden
+            </Link>
+          )}
           <div className="avatar">{doctorIniciales}</div>
         </div>
       </div>
@@ -117,12 +149,19 @@ export function OrderList({ orders, doctorIniciales }: OrderListProps) {
           </div>
         </div>
 
+        {/* Slot del encabezado (ver prop `encabezado`): va después de los
+            stats y antes del buscador, porque no forma parte de la lista
+            filtrable de abajo. */}
+        {encabezado}
+
         <div className="toolbar">
           <div className="search-box">
             <Search size={16} strokeWidth={2} />
             <input
               type="text"
-              placeholder="Buscar paciente o folio..."
+              placeholder={
+                mostrarDoctor ? "Buscar paciente, folio o doctor..." : "Buscar paciente o folio..."
+              }
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -152,7 +191,12 @@ export function OrderList({ orders, doctorIniciales }: OrderListProps) {
             // React lo usa para saber qué tarjeta es cuál entre un
             // render y el siguiente (por ejemplo, al filtrar).
             ordenesFiltradas.map((order) => (
-              <OrderCard key={order.folio} order={order} onOpen={setOrdenAbierta} />
+              <OrderCard
+                key={order.folio}
+                order={order}
+                onOpen={setOrdenAbierta}
+                mostrarDoctor={mostrarDoctor}
+              />
             ))
           )}
         </div>

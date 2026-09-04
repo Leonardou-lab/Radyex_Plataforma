@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/server";
 import { initials } from "@/lib/data";
 import { OrderList } from "@/components/ordenes/OrderList";
+import { SolicitudesEnRevision } from "@/components/ordenes/SolicitudesEnRevision";
 import { mapearOrden, type FilaOrdenDB } from "@/lib/mapeo-ordenes";
+import { mapearSolicitud, type FilaSolicitudDB } from "@/lib/mapeo-solicitudes";
 
 // Pantalla "Mis órdenes" — MOLDE de la Fase 4 (ver docs/migracion-nextjs.md).
 //
@@ -90,5 +92,42 @@ export default async function OrdenesPage() {
   const filas = (data ?? []) as unknown as FilaOrdenDB[];
   const ordenes = filas.map(mapearOrden);
 
-  return <OrderList orders={ordenes} doctorIniciales={doctorIniciales} />;
+  // Solicitudes que el doctor ya envió y Radyex todavía no procesa. Van en
+  // una consulta aparte porque son otra tabla y otro molde: una solicitud
+  // pendiente NO es una orden (no tiene folio hasta que la aprueban).
+  //
+  // Aquí SÍ se filtra por `estado`, pero eso es regla de negocio ("solo las
+  // pendientes"), no control de acceso: de que solo salgan las suyas se
+  // encarga la RLS ("un doctor ve sus propias solicitudes de orden").
+  const { data: dataSolicitudes, error: errorSolicitudes } = await supabase
+    .from("solicitudes_orden")
+    .select(
+      `
+      id,
+      created_at,
+      entrega,
+      estudios,
+      paciente_id,
+      paciente_datos,
+      pacientes ( nombre_completo )
+      `,
+    )
+    .eq("estado", "pendiente")
+    .order("created_at", { ascending: false });
+
+  if (errorSolicitudes) {
+    console.error("No se pudieron cargar las solicitudes:", errorSolicitudes.message);
+  }
+
+  const solicitudes = ((dataSolicitudes ?? []) as unknown as FilaSolicitudDB[]).map(
+    mapearSolicitud,
+  );
+
+  return (
+    <OrderList
+      orders={ordenes}
+      doctorIniciales={doctorIniciales}
+      encabezado={<SolicitudesEnRevision solicitudes={solicitudes} />}
+    />
+  );
 }

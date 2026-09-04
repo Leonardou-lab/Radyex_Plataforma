@@ -8,6 +8,7 @@ import {
   Upload,
   History,
   BarChart3,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +39,11 @@ export const DOCTOR_NAV_ITEMS: NavItem[] = [
 // está migrada todavía — son las siguientes en la fase 4.
 export const RADYEX_NAV_ITEMS: NavItem[] = [
   { href: "/admin", label: "Inicio", icon: Home },
+  // "Solicitudes" no viene del mockup: nació con la mecánica
+  // `solicitudes_orden` (las órdenes que manda el doctor pasan por revisión
+  // del equipo antes de existir). Va antes de "Órdenes" porque es la bandeja
+  // de entrada del flujo: primero se revisa, luego la orden aparece allá.
+  { href: "/admin/solicitudes", label: "Solicitudes", icon: Inbox },
   { href: "/admin/ordenes", label: "Órdenes", icon: ClipboardList },
   { href: "/admin/doctores", label: "Doctores", icon: Stethoscope },
   { href: "/admin/subir", label: "Subir archivos", icon: Upload },

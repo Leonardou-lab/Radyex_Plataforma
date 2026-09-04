@@ -144,6 +144,29 @@ tanto la vista del doctor (RLS filtra por `doctor_id`) como la vista de Radyex (
 filtro, agrupando por `paciente_id`). No hace falta una tabla intermedia
 doctor-paciente — la relación ya está implícita en las órdenes.
 
+### Flujo "el doctor manda la orden, Radyex la revisa" — `solicitudes_orden` (2026-09-02)
+
+Concreción de "lo vincula o lo crea el equipo de Radyex al procesar la orden".
+El doctor **no escribe en `pacientes` ni en `ordenes`** (la RLS solo deja a
+equipo/admin crear pacientes). El formulario de "Nueva orden" del doctor crea una
+fila en **`public.solicitudes_orden`** (estado `pendiente`):
+
+1. Si el doctor elige a un paciente que **ya refirió**, la solicitud trae su
+   `paciente_id` (revisión de Radyex = confirmar).
+2. Si es **nuevo para él**, la solicitud trae `paciente_datos` (nombre, fecha de
+   nacimiento, teléfono, correo tecleados) y `paciente_id` queda NULL.
+3. Radyex revisa: busca en `pacientes` si esa persona ya existe (referida por otro
+   doctor) → la **enlaza** a ese expediente, o **crea** uno nuevo.
+4. Al **aprobar** se materializan `ordenes` + `orden_estudios` reales; la solicitud
+   pasa a `aprobada` con su `orden_id`.
+
+El doctor solo ve sus propias solicitudes y sus propias órdenes; la deduplicación y
+el expediente compartido siguen siendo solo de Radyex. Es una mecánica **aparte** de
+`solicitudes_pendientes` (esa es para altas de doctor y cambios sensibles a
+perfiles). Esquema: `radyex-web/supabase/migrations/20260902120000_solicitudes_orden.sql`.
+Pendiente: la función `aprobar_solicitud_orden()` (crear/enlazar paciente + folio +
+insertar), y marcar la orden como "en revisión" en la vista "Mis órdenes" del doctor.
+
 ---
 
 ## Resumen de estado
@@ -159,3 +182,4 @@ doctor-paciente — la relación ya está implícita en las órdenes.
 | Baja de doctor = desactivación, no borrado | Cerrado |
 | Respaldo .rar al desactivar doctor | Pendiente de backend + pregunta abierta de alcance |
 | Pacientes compartidos entre doctores | Cerrado (2026-08-24) — paciente único, filtro por `doctor_id` en la orden |
+| Doctor manda orden → Radyex revisa/vincula paciente (`solicitudes_orden`) | Cerrado (2026-09-02, opción B2) — tabla propuesta; falta `aprobar_solicitud_orden()` + UI |
