@@ -1,8 +1,9 @@
-import { Mail, Lock, LogIn, AlertCircle } from "lucide-react";
+import { Mail, LogIn, AlertCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CampoContrasena } from "@/components/login/CampoContrasena";
 import { login } from "./actions";
 
 // Pantalla de login (fase 3). Server Component: el formulario se envía a la
@@ -54,30 +55,16 @@ export default async function LoginPage({
                   autoComplete="email"
                   required
                   placeholder="doctor@correo.com"
-                  className="pl-9"
+                  // h-11 = 44px: mismo objetivo táctil mínimo que el resto del
+                  // sitio en móvil, y empareja con el campo de contraseña.
+                  className="h-11 pl-9"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="contrasena">Contraseña</Label>
-              <div className="relative">
-                <Lock
-                  size={16}
-                  strokeWidth={2}
-                  className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  id="contrasena"
-                  name="contrasena"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  placeholder="••••••••"
-                  className="pl-9"
-                />
-              </div>
-            </div>
+            {/* Único trozo de esta pantalla que corre en el cliente: el
+                botón de mostrar/ocultar necesita estado. */}
+            <CampoContrasena />
 
             <Button type="submit" size="lg" className="mt-1 w-full">
               Entrar
